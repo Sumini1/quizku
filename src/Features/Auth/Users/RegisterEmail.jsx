@@ -9,7 +9,7 @@ import { HiBadgeCheck } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
 import { setRegisterData } from "../Reducer/registerSlice";
 import Swal from "sweetalert2";
-import Button from "../../../components/ListButton/Button";
+import Button from "../../../Components/ListButton/Button";
 import { FcGoogle } from "react-icons/fc";
 
 const RegisterEmail = () => {
