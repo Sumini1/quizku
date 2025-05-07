@@ -9,7 +9,7 @@ import { fetchLogin } from "../Reducer/loginSlice";
 import Cookies from "js-cookie";
 import { FcGoogle } from "react-icons/fc";
 
-import Button from "../../../components/ListButton/Button";
+import Button from "../../../Components/ListButton/Button";
 
 const Login = () => {
   const { getBorder, getButtonClass, getBorderClass, middleTheme } = useTheme();
