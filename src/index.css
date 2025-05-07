@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+[data-theme="light"] {
+  --bg-color: linear-gradient(to right, rgb(158, 234, 240), #f9fafb);
+  --text-color: #222;
+  background: var(--bg-color);
+
+  h2 {
+    color: #0961F5;
+  }
+
+  p {
+    color: #333;
+  }
+}
+
+[data-theme="dark"] {
+  --bg-color: #282b32;
+  --text-color: white;
+}
+
+[data-theme="cupcake"] {
+  --bg-color: #E0CEFF;
+  --text-color: #4B4B4B;
+
+  h2 {
+    color: #D9005C;
+  }
+}
+
+[data-theme="Piece"] {
+  --bg-color: #f9fafb;
+  --text-color: #ce0af5;
+}
+
+[data-theme="lemonade"] {
+  --bg-color: #E1F396;
+  --text-color: #015055;
+}
+
+[data-theme="bumblebee"] {
+  --bg-color: hsl(48, 79%, 66%);
+  --text-color: rgb(86, 121, 43);
+
+
+  h1 {
+    color: var(--h1-color, var(--text-color)) !important;
+  }
+
+  p {
+    color: var(--p-color, var(--text-color));
+    /* Gunakan --p-color, fallback ke --text-color */
+  }
+
+}
+
+/* body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+} */
+
+
+.type {
+  list-style-type: decimal;
+  /* Default angka */
+  /* list-style-type: upper-roman; // Untuk angka Romawi besar */
+  /* list-style-type: lower-alpha; // Untuk huruf kecil a, b, c */
+}
+
+
+.swiper-pagination {
+  position: relative !important;
+  margin-top: 10px !important;
+  text-align: center;
+}
