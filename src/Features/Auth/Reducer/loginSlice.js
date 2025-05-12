@@ -1,19 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import Swal from "sweetalert2";
-import axios from "axios"; // Ensure axios is imported
+import axios from "axios";
 import Cookies from "js-cookie";
 
-// Thunk for login
+// Thunk untuk login
 export const fetchLogin = createAsyncThunk(
   "login/fetchLogin",
   async (userData, { rejectWithValue }) => {
     try {
-      // Validate input: ensure identifier and password are provided
       if (!userData.identifier || !userData.password) {
         throw new Error("Email atau username serta password harus diisi");
       }
 
-      // Send login request to API
       const response = await axios.post(
         "https://quizku-production.up.railway.app/auth/login",
         {
@@ -26,31 +24,25 @@ export const fetchLogin = createAsyncThunk(
       );
 
       const data = response.data;
-      console.log("Login response:", data);
 
-      // Check if the response indicates success
       if (data.status !== "success" || !data.data?.access_token) {
         throw new Error(data.message || "Login gagal");
       }
 
-      // Store tokens in cookies instead of localStorage
-      // Set cookies with js-cookie library (simpler than raw document.cookie)
       Cookies.set("access_token", data.data.access_token, {
-        expires: 1 / 24, // 1 hour (1/24 of a day)
+        expires: 1 / 24,
         secure: true,
         sameSite: "strict",
       });
 
       Cookies.set("refresh_token", data.data.refresh_token_debug, {
-        expires: 7, // 7 days
+        expires: 7,
         secure: true,
         sameSite: "strict",
       });
 
-      // Store role in localStorage (non-sensitive data)
       if (data.data.user) {
         localStorage.setItem("role", data.data.user.role);
-        // console.log("Saved role:", localStorage.getItem("role")); // debug langsung
       }
 
       Swal.fire({
@@ -60,11 +52,10 @@ export const fetchLogin = createAsyncThunk(
         showConfirmButton: true,
       });
 
-      return data.data; // Return user data
+      return data.data;
     } catch (error) {
       console.error("Login error:", error);
 
-      // Handle backend error
       Swal.fire({
         icon: "error",
         title: "Login Gagal",
@@ -79,47 +70,20 @@ export const fetchLogin = createAsyncThunk(
   }
 );
 
-// Thunk for logout
+// Thunk untuk logout
 export const fetchLogout = createAsyncThunk(
   "login/fetchLogout",
   async (_, { rejectWithValue }) => {
     try {
-      // Get the access token from cookies
       const access_token = Cookies.get("access_token");
 
       if (!access_token) {
         throw new Error("Token tidak ditemukan. Sesi mungkin sudah berakhir.");
       }
 
-      // Call logout API if needed
-      // Uncomment this section if you have a backend logout endpoint
-      /*
-      const response = await axios.post(
-        "https://quizku-production.up.railway.app/auth/logout",
-        {}, // Empty body or whatever your API requires
-        {
-          headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${access_token}`
-          },
-        }
-      );
-      
-      // Check response if needed
-      const data = response.data;
-      if (data.status !== "success") {
-        throw new Error(data.message || "Logout gagal");
-      }
-      */
-
-      // Remove cookies
       Cookies.remove("access_token");
       Cookies.remove("refresh_token");
-
-      // Clear any other stored user data
       localStorage.removeItem("role");
-      localStorage.removeItem("loginCount");
-      // Add any other items that need to be cleared
 
       Swal.fire({
         title: "Logout Berhasil",
@@ -132,7 +96,6 @@ export const fetchLogout = createAsyncThunk(
     } catch (error) {
       console.error("Logout error:", error);
 
-      // Handle error
       Swal.fire({
         icon: "error",
         title: "Logout Gagal",
@@ -144,7 +107,44 @@ export const fetchLogout = createAsyncThunk(
   }
 );
 
-// Slice for login
+// Thunk untuk refresh token
+export const refreshAccessToken = createAsyncThunk(
+  "login/refreshAccessToken",
+  async (_, { rejectWithValue }) => {
+    try {
+      const refresh_token = Cookies.get("refresh_token");
+
+      if (!refresh_token) {
+        throw new Error("Refresh token tidak ditemukan.");
+      }
+
+      const response = await axios.post(
+        "https://quizku-production.up.railway.app/auth/refresh-token",
+        { refresh_token },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      const data = response.data;
+
+      if (data.status !== "success" || !data.data?.access_token) {
+        throw new Error(data.message || "Gagal memperbarui token.");
+      }
+
+      Cookies.set("access_token", data.data.access_token, {
+        expires: 1 / 24,
+        secure: true,
+        sameSite: "strict",
+      });
+
+      return data.data.access_token;
+    } catch (error) {
+      console.error("Error refreshing access token:", error);
+      return rejectWithValue(error.message || "Gagal memperbarui token.");
+    }
+  }
+);
+
+// Slice untuk login
 const loginSlice = createSlice({
   name: "login",
   initialState: {
@@ -153,7 +153,12 @@ const loginSlice = createSlice({
     error: null,
   },
   reducers: {
-    // You can add more reducers here if needed
+    logout: (state) => {
+      state.user = null;
+      Cookies.remove("access_token");
+      Cookies.remove("refresh_token");
+      localStorage.removeItem("role");
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -163,11 +168,11 @@ const loginSlice = createSlice({
       })
       .addCase(fetchLogin.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload; // Store user data
+        state.user = action.payload;
       })
       .addCase(fetchLogin.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload; // Store error message
+        state.error = action.payload;
       })
       .addCase(fetchLogout.pending, (state) => {
         state.loading = true;
@@ -175,13 +180,21 @@ const loginSlice = createSlice({
       })
       .addCase(fetchLogout.fulfilled, (state) => {
         state.loading = false;
-        state.user = null; // Reset user data
+        state.user = null;
       })
       .addCase(fetchLogout.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload; // Store error message
+        state.error = action.payload;
+      })
+      .addCase(refreshAccessToken.fulfilled, (state, action) => {
+        Cookies.set("access_token", action.payload, {
+          expires: 1 / 24,
+          secure: true,
+          sameSite: "strict",
+        });
       });
   },
 });
 
+export const { logout } = loginSlice.actions;
 export default loginSlice.reducer;

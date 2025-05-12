@@ -20,7 +20,7 @@ const Tutorial2 = () => {
       <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
       <div className="w-[280px] mt-12 max-w-md mx-auto h-screen overflow-hidden flex flex-col">
         {/* Progress Bar */}
-        <div className="w-full bg-[#0961F5] rounded-full h-3 mb-3"></div>
+        <div className="w-full bg-[#0961F5] rounded-full h-3 mb-3 -ml-4"></div>
 
         {/* Konten */}
         <div className="relative bg-white p-3 rounded-lg shadow-md text-sm text-gray-800">

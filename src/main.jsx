@@ -8,14 +8,17 @@ import { ThemeProvider } from './Context/ThemeContext.jsx'
 import { Provider } from 'react-redux'
 import { store } from './store/index.js'
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <Provider store={store}>
-    <BrowserRouter>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </BrowserRouter>
-    </Provider>
-  </StrictMode>,
-)
+   const rootElement = document.getElementById("root");
+   console.log(rootElement); // This should log the <div> element or null
+   createRoot(rootElement).render(
+     <StrictMode>
+       <Provider store={store}>
+         <BrowserRouter>
+           <ThemeProvider>
+             <App />
+           </ThemeProvider>
+         </BrowserRouter>
+       </Provider>
+     </StrictMode>
+   );
+   

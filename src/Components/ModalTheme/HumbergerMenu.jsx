@@ -88,10 +88,11 @@ const HumbergerMenu = ({ isOpen, onClose }) => {
   ];
 
   return (
-    <div
-      className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center p-5 z-50"
-      onClick={handleOverlayClick}
-    >
+    <div className="fixed inset-0 z-50 flex justify-center items-center p-5">
+      <div
+        onClick={handleOverlayClick}
+        className="absolute inset-0 bg-black opacity-50 z-0"
+      ></div>
       {/* Kontainer Modal */}
       <div className="bg-gray-100 rounded-lg shadow-xl w-full  max-w-md mx-auto">
         <div

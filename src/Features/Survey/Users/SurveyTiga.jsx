@@ -79,13 +79,13 @@ const SurveyTiga = () => {
         </div>
 
         {isModalOpen && (
-          <div
-            className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-7"
-            style={{ zIndex: 50 }}
-          >
+          <div className="fixed inset-0 z-50 flex justify-center items-center p-5">
             <div
-              className={`p-5 rounded-xl flex flex-col items-center border-none gap-4 bg-[#DCFFD9]`}
-            >
+              // onClick={handleOverlayClick}
+              className="absolute inset-0 bg-black opacity-50 z-0"
+            ></div>
+            <div className="bg-white p-5 z-10 flex flex-col items-center rounded-md shadow-md w-[90%] max-w-md">
+              
               <HiBadgeCheck className={`text-8xl p-2 text-[#28A745]`} />
               {/* Ikon sukses */}
               <p className="text-lg font-semibold">Survei berhasil dikirim</p>
