@@ -53,11 +53,11 @@ const SurveySatu = () => {
   };
 
   return (
-    <div className="w-full mx-auto h-screen  md:p-0 flex flex-col">
+    <div className="w-full  mx-auto h-screen overflow-auto   md:p-0 flex flex-col">
       <div
-        className={`w-full max-w-md mx-auto h-screen  flex flex-col justify-between ${middleTheme()} p-5`}
+        className={`w-full p-5 max-w-md mx-auto h-screen overflow-auto  flex flex-col ${middleTheme()}`}
       >
-        <div className="mt-7 md:pb-32 flex flex-col flex-grow overflow-hidden pb-24">
+        <div className="mt-7 md:pb-32 flex flex-col flex-grow overflow-hidden pb-32">
           <h2 className="text-xl font-semibold mb-3 mt-auto">Usia</h2>
           <h1 className="text-lg font-medium mb-5">
             Mohon partisipasinya untuk pengembangan aplikasi
@@ -84,13 +84,13 @@ const SurveySatu = () => {
           </div>
         </div>
 
-        <div className="flex mt-5 mb-7 md:mb-10 mx-auto text-xl justify-center items-center text-center">
+        <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 flex space-x-2 items-center text-xl">
           <GoDotFill className={getDotClassSurvey(0)} />
           <GoDotFill className={getDotClassSurvey(1)} />
           <GoDotFill className={getDotClassSurvey(2)} />
         </div>
 
-        <div className=" sticky bottom-0  left-0 right-0">
+        <div className=" fixed bottom-0 left-0 right-0 px-5 py-3  max-w-md mx-auto">
           <button
             onClick={handleNextClick}
             className={`text-white flex p-3 border-none rounded-xl w-full items-center justify-center ${getButtonClass()} text-base font-medium`}
