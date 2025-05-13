@@ -59,7 +59,7 @@ const SurveyDua = () => {
       <div
         className={`w-full p-5 max-w-md mx-auto h-screen overflow-auto  flex flex-col ${middleTheme()}`}
       >
-        <div className="mt-7 md:pb-32 flex flex-col flex-grow overflow-hidden pb-32">
+        <div className="mt-10git  md:pb-32 flex flex-col flex-grow overflow-hidden pb-32">
           <h2 className="text-xl font-semibold mb-3 ">
             Mengetahui Learn Quiz dari
           </h2>
