@@ -84,7 +84,7 @@ const SurveySatu = () => {
           </div>
         </div>
 
-        <div className="flex mb-7 md:mb-10 mx-auto text-xl justify-center items-center text-center">
+        <div className="flex -mt-5 mb-7 md:mb-10 mx-auto text-xl justify-center items-center text-center">
           <GoDotFill className={getDotClassSurvey(0)} />
           <GoDotFill className={getDotClassSurvey(1)} />
           <GoDotFill className={getDotClassSurvey(2)} />
@@ -100,8 +100,9 @@ const SurveySatu = () => {
         </div>
 
         {isModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-5 rounded-md shadow-md w-[90%] max-w-md">
+          <div className="fixed inset-0 z-50 flex justify-center items-center p-5">
+            <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
+            <div className="bg-white p-5 z-10 rounded-md shadow-md w-[90%] max-w-md">
               <h2 className="text-lg font-semibold mb-3">Peringatan</h2>
               <p className="mb-5">
                 Anda harus memilih usia terlebih dahulu sebelum melanjutkan.

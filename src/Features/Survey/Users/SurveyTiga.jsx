@@ -62,7 +62,7 @@ const SurveyTiga = () => {
           </div>
         </div>
 
-        <div className="flex justify-center items-center text-center mb-7 md:mb-10 text-xl">
+        <div className="flex -mt-5 justify-center items-center text-center mb-7 md:mb-10 text-xl">
           <GoDotFill className={getDotClassSurvey(0)} />
           <GoDotFill className={getDotClassSurvey(1)} />
           <GoDotFill className={getDotClassSurvey(2)} />
