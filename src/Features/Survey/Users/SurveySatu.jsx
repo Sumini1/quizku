@@ -10,11 +10,12 @@ const SurveySatu = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Set overflow:hidden only when this page is active
+  // Set overflow:hidden hanya saat halaman ini aktif
   useEffect(() => {
     document.body.style.overflow = "hidden";
+
     return () => {
-      document.body.style.overflow = "auto"; // Restore scroll when leaving page
+      document.body.style.overflow = "auto"; // Pulihkan scroll saat keluar dari halaman
     };
   }, []);
 
@@ -35,6 +36,7 @@ const SurveySatu = () => {
   const handleNextClick = () => {
     if (!selectedOption) {
       setIsModalOpen(true);
+      console.log("Modal state set to true");
     } else {
       navigate("/survey-dua", {
         state: {
@@ -51,17 +53,16 @@ const SurveySatu = () => {
   };
 
   return (
-    <div className="w-full mx-auto h-screen md:p-0 flex flex-col">
+    <div className="w-full mx-auto h-screen  md:p-0 flex flex-col">
       <div
-        className={`w-full max-w-md mx-auto h-screen flex flex-col ${middleTheme()} p-5 relative`}
+        className={`w-full max-w-md mx-auto h-screen  flex flex-col justify-between ${middleTheme()} p-5`}
       >
-        {/* Main content with options */}
-        <div className="flex-1 overflow-y-auto pb-5 pt-10">
-          <h2 className="text-xl font-semibold mb-3">Usia</h2>
+        <div className="mt-7 md:pb-32 flex flex-col flex-grow overflow-hidden pb-24">
+          <h2 className="text-xl font-semibold mb-3 mt-auto">Usia</h2>
           <h1 className="text-lg font-medium mb-5">
             Mohon partisipasinya untuk pengembangan aplikasi
           </h1>
-          <div className="flex flex-col gap-1 md:mt-16">
+          <div className="flex flex-col gap-1 md:mt-20">
             {options.map((option) => (
               <div key={option.id} className="flex gap-5 mt-3 mb-2">
                 <input
@@ -83,16 +84,13 @@ const SurveySatu = () => {
           </div>
         </div>
 
-        {/* Footer section with dots and button - Fixed height to ensure consistency */}
-        <div className="h-28 flex flex-col justify-end mb-5">
-          {/* Dots container with fixed height */}
-          <div className="flex justify-center items-center text-xl mb-5">
-            <GoDotFill className={getDotClassSurvey(0)} />
-            <GoDotFill className={getDotClassSurvey(1)} />
-            <GoDotFill className={getDotClassSurvey(2)} />
-          </div>
+        <div className="flex mb-7 md:mb-10 mx-auto text-xl justify-center items-center text-center">
+          <GoDotFill className={getDotClassSurvey(0)} />
+          <GoDotFill className={getDotClassSurvey(1)} />
+          <GoDotFill className={getDotClassSurvey(2)} />
+        </div>
 
-          {/* Button */}
+        <div className=" sticky bottom-0 left-0 right-0">
           <button
             onClick={handleNextClick}
             className={`text-white flex p-3 border-none rounded-xl w-full items-center justify-center ${getButtonClass()} text-base font-medium`}
@@ -101,11 +99,9 @@ const SurveySatu = () => {
           </button>
         </div>
 
-        {/* Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex justify-center items-center p-5">
-            <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
-            <div className="bg-white p-5 z-10 rounded-md shadow-md w-[90%] max-w-md">
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-5 rounded-md shadow-md w-[90%] max-w-md">
               <h2 className="text-lg font-semibold mb-3">Peringatan</h2>
               <p className="mb-5">
                 Anda harus memilih usia terlebih dahulu sebelum melanjutkan.
