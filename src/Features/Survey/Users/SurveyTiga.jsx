@@ -1,28 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../../Context/ThemeContext";
 import { GoDotFill } from "react-icons/go";
-import { BiSolidCalendarCheck } from "react-icons/bi";
 import { HiBadgeCheck } from "react-icons/hi";
 
 const SurveyTiga = () => {
-  const {
-    theme,
-    getButtonClass,
-    getDotClassSurvey,
-    middleTheme,
-    getBorder,
-    getThemeClass,
-  } = useTheme();
+  const { theme, getButtonClass, getDotClassSurvey, middleTheme, getBorder } =
+    useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Set overflow:hidden hanya saat halaman ini aktif
+  // Set overflow:hidden only when this page is active
   useEffect(() => {
     document.body.style.overflow = "hidden";
-
     return () => {
-      document.body.style.overflow = "auto"; // Pulihkan scroll saat keluar dari halaman
+      document.body.style.overflow = "auto"; // Restore scroll when leaving page
     };
   }, []);
 
@@ -30,6 +22,7 @@ const SurveyTiga = () => {
     setIsModalOpen(false);
     navigate("/list-levels");
   };
+
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
@@ -39,9 +32,9 @@ const SurveyTiga = () => {
       <div
         className={`w-full max-w-md mx-auto h-screen flex flex-col ${middleTheme()} p-5 relative`}
       >
-        {/* Main content area */}
-        <div className="flex-grow">
-          <h2 className="text-xl font-semibold mb-3 mt-10 tracking-wide leading-[1.6]">
+        {/* Main content area - scrollable if needed */}
+        <div className="flex-1 overflow-y-auto pb-5 pt-10">
+          <h2 className="text-xl font-semibold mb-3 tracking-wide leading-[1.6]">
             Motivasi Belajar
           </h2>
           <h1 className="text-lg font-medium mb-5 tracking-wide leading-[1.6]">
@@ -63,10 +56,10 @@ const SurveyTiga = () => {
           </div>
         </div>
 
-        {/* Bottom navigation area - Fixed at bottom with proper spacing */}
-        <div className="mt-20 flex flex-col">
-          {/* Dots with proper spacing that works on all screen sizes */}
-          <div className="flex flex-row justify-center items-center text-center mb-5 text-xl">
+        {/* Footer section with dots and button - Fixed height to ensure consistency */}
+        <div className="h-28 flex flex-col justify-end mb-5">
+          {/* Dots container with fixed height */}
+          <div className="flex justify-center items-center text-xl mb-5">
             <GoDotFill className={getDotClassSurvey(0)} />
             <GoDotFill className={getDotClassSurvey(1)} />
             <GoDotFill className={getDotClassSurvey(2)} />
@@ -76,7 +69,7 @@ const SurveyTiga = () => {
           <button
             onClick={handleOpenModal}
             type="submit"
-            className={`text-white sticky bottom-0 flex p-3 border-none rounded-xl w-full items-center justify-center ${getButtonClass()} text-base font-medium`}
+            className={`text-white flex p-3 border-none rounded-xl w-full items-center justify-center ${getButtonClass()} text-base font-medium`}
           >
             Lanjut
           </button>
