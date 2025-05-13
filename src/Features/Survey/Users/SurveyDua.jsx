@@ -57,7 +57,7 @@ const SurveyDua = () => {
   return (
     <div className="w-full mx-auto h-screen overflow-hidden md:p-0 flex flex-col">
       <div
-        className={`w-full max-w-md mx-auto h-screen overflow-hidden flex flex-col justify-between ${middleTheme()} p-5`}
+        className={`w-full max-w-md mx-auto h-screen  flex flex-col justify-between ${middleTheme()} p-5`}
       >
         <div className="mt-7 md:pb-32 flex flex-col flex-grow overflow-y-auto pb-24">
           <h2 className="text-xl font-semibold mb-3 mt-auto">
@@ -66,7 +66,7 @@ const SurveyDua = () => {
           <h1 className="text-lg font-medium mb-5">
             Mohon partisipasinya untuk pengembangan aplikasi
           </h1>
-          <div className="flex flex-col gap-1 md:mt-20">
+          <div className="flex flex-col gap-1 md:mt-16">
             {options.map((option) => (
               <div key={option.id} className="flex gap-5 mt-3 mb-2">
                 <input

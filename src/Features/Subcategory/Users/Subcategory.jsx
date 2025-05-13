@@ -22,8 +22,8 @@ const Subcategory = () => {
   const { getIconColorAlert } = useTheme();
   const { difficultyId } = useParams(); // Mendapatkan difficultyId dari URL
   const { data, status, error } = useSelector((state) => state.subcategory);
-  const {data : categories} = useSelector((state) => state.categories);
-  console.log("subcategory", data);
+  const { data: categories } = useSelector((state) => state.categories);
+  // console.log("subcategory", data);
   console.log("categories", categories);
   const { middleTheme } = useTheme();
 
@@ -33,14 +33,14 @@ const Subcategory = () => {
   // Mendapatkan data dari state navigasi (dikirim dari PilihCategory)
   const categoryDetails = location.state?.categoryDetails;
 
-  useEffect(() => {
-    if (difficultyId) {
-      dispatch(fetchSubcategory(difficultyId)); // Hanya kirim difficultyId saja
-      dispatch(fetchCategories(difficultyId));
-    } else {
-      console.log("Missing difficultyId for API call");
-    }
-  }, [dispatch, difficultyId]);
+ useEffect(() => {
+   if (difficultyId) {
+     dispatch(fetchSubcategory(difficultyId));
+     dispatch(fetchCategories(difficultyId));
+   } else {
+     console.log("Missing difficultyId for API call");
+   }
+ }, [dispatch, difficultyId]);
 
   // Handler untuk kembali ke halaman sebelumnya
   const handleBack = () => {
@@ -82,7 +82,7 @@ const Subcategory = () => {
             </div>
 
             {/* Subcategories Skeleton Cards */}
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-4 mb-5">
               {[...Array(2)].map((_, i) => (
                 <div
                   key={i}
@@ -261,7 +261,7 @@ const Subcategory = () => {
                                       </div>
                                     </div>
 
-                                    <div className="border-t border-gray-200 rounded-t-none rounded-t-2xl bg-gray-50 p-4 ">
+                                    <div className="border-t border-gray-200 rounded-t-none rounded-lg bg-gray-50 p-4 ">
                                       <h3 className="text-base font-semibold">
                                         {subcategory.name}
                                       </h3>

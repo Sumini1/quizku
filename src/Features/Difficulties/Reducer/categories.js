@@ -26,6 +26,29 @@ export const fetchCategories = createAsyncThunk(
     }
   );    
 
+  export const fetchCategoriesById = createAsyncThunk(
+    "categoriesById/fetch",
+    async (id, { rejectWithValue }) => {
+      try {
+        const response = await api.get(`/u/categories/${id}`);
+        const responseData = response.data;
+  
+        // Validasi data
+        if (!responseData?.data || !Array.isArray(responseData.data)) {
+          return rejectWithValue("Format data tidak valid");
+        }
+  
+        // Kembalikan hanya data yang dibutuhkan
+        return responseData.data;
+      } catch (error) {
+        // Tangani error dari Axios atau error lainnya
+        const errorMessage =
+          error.response?.data?.message || error.message || "Terjadi kesalahan";
+        return rejectWithValue(errorMessage);
+      }
+    }
+  )
+
   const categoriesSlice = createSlice({
     name: "categories",
     initialState: {
@@ -44,6 +67,18 @@ export const fetchCategories = createAsyncThunk(
           state.data = action.payload;
         })
         .addCase(fetchCategories.rejected, (state, action) => {
+          state.status = "failed";
+          state.error = action.error.message;
+        })
+        // fetch by id
+        .addCase(fetchCategoriesById.pending, (state) => {
+          state.status = "loading";
+        })
+        .addCase(fetchCategoriesById.fulfilled, (state, action) => {
+          state.status = "succeeded";
+          state.data = action.payload;
+        })
+        .addCase(fetchCategoriesById.rejected, (state, action) => {
           state.status = "failed";
           state.error = action.error.message;
         });
