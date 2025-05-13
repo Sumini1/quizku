@@ -57,8 +57,8 @@ const SurveySatu = () => {
       <div
         className={`w-full p-5 max-w-md mx-auto h-screen overflow-auto  flex flex-col ${middleTheme()}`}
       >
-        <div className="-mt-10 md:pb-32 flex flex-col flex-grow overflow-hidden pb-32">
-          <h2 className="text-xl font-semibold mb-3 mt-auto">Usia</h2>
+        <div className="mt-7 md:pb-32 flex flex-col flex-grow overflow-hidden pb-32">
+          <h2 className="text-xl font-semibold mb-3  ">Usia</h2>
           <h1 className="text-lg font-medium mb-5">
             Mohon partisipasinya untuk pengembangan aplikasi
           </h1>
