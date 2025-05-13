@@ -35,11 +35,12 @@ const SurveyTiga = () => {
   };
 
   return (
-    <div className="w-full mx-auto h-screen overflow-hidden md:p-0 flex flex-col">
+    <div className="w-full mx-auto h-screen md:p-0 flex flex-col">
       <div
-        className={`w-full max-w-md mx-auto h-screen  flex flex-col justify-between ${middleTheme()} p-5 relative`}
+        className={`w-full max-w-md mx-auto h-screen flex flex-col ${middleTheme()} p-5 relative`}
       >
-        <div className="flex-1 flex flex-col">
+        {/* Main content area */}
+        <div className="flex-grow">
           <h2 className="text-xl font-semibold mb-3 mt-10 tracking-wide leading-[1.6]">
             Motivasi Belajar
           </h2>
@@ -55,39 +56,38 @@ const SurveyTiga = () => {
               cols="20"
               rows="5"
               placeholder="Motivasi belajar, tulis di sini yaa"
-              className={`border-[1px] rounded-md text-[#333] p-5 ${getBorder()}  ${
+              className={`border-[1px] rounded-md text-[#333] p-5 ${getBorder()} ${
                 theme === "cupcake" && "border-[rgb(237,226,236)] border-2"
               }`}
             ></textarea>
           </div>
         </div>
 
-        <div className="flex justify-center items-center text-center mb-7 md:mb-10 text-xl">
-          <GoDotFill className={getDotClassSurvey(0)} />
-          <GoDotFill className={getDotClassSurvey(1)} />
-          <GoDotFill className={getDotClassSurvey(2)} />
-        </div>
+        {/* Bottom navigation area - Fixed at bottom with proper spacing */}
+        <div className="mt-20 flex flex-col">
+          {/* Dots with proper spacing that works on all screen sizes */}
+          <div className="flex flex-row justify-center items-center text-center mb-5 text-xl">
+            <GoDotFill className={getDotClassSurvey(0)} />
+            <GoDotFill className={getDotClassSurvey(1)} />
+            <GoDotFill className={getDotClassSurvey(2)} />
+          </div>
 
-        <div className="    sticky bottom-0 left-0 right-0 mt-auto">
+          {/* Button */}
           <button
             onClick={handleOpenModal}
             type="submit"
-            className={`text-white flex p-3 border-none rounded-xl w-full items-center justify-center ${getButtonClass()} text-base font-medium`}
+            className={`text-white sticky bottom-0 flex p-3 border-none rounded-xl w-full items-center justify-center ${getButtonClass()} text-base font-medium`}
           >
             Lanjut
           </button>
         </div>
 
+        {/* Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex justify-center items-center p-5">
-            <div
-              // onClick={handleOverlayClick}
-              className="absolute inset-0 bg-black opacity-50 z-0"
-            ></div>
+            <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
             <div className="bg-white p-5 z-10 flex flex-col items-center rounded-md shadow-md w-[90%] max-w-md">
-              
-              <HiBadgeCheck className={`text-8xl p-2 text-[#28A745]`} />
-              {/* Ikon sukses */}
+              <HiBadgeCheck className="text-8xl p-2 text-[#28A745]" />
               <p className="text-lg font-semibold">Survei berhasil dikirim</p>
               <div className="text-center mb-2">
                 <p>
@@ -96,7 +96,7 @@ const SurveyTiga = () => {
               </div>
               <button
                 onClick={handleSurvey}
-                className={`p-3 w-full border-none rounded-xl bg-[#28A745] text-[#DCFFD9]`}
+                className="p-3 w-full border-none rounded-xl bg-[#28A745] text-[#DCFFD9]"
               >
                 Lanjut
               </button>
