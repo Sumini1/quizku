@@ -84,13 +84,13 @@ const SurveySatu = () => {
           </div>
         </div>
 
-        <div className="flex -mt-5 mb-7 md:mb-10 mx-auto text-xl justify-center items-center text-center">
+        <div className="flex mt-5 mb-7 md:mb-10 mx-auto text-xl justify-center items-center text-center">
           <GoDotFill className={getDotClassSurvey(0)} />
           <GoDotFill className={getDotClassSurvey(1)} />
           <GoDotFill className={getDotClassSurvey(2)} />
         </div>
 
-        <div className=" sticky bottom-0 left-0 right-0">
+        <div className=" sticky bottom-0  left-0 right-0">
           <button
             onClick={handleNextClick}
             className={`text-white flex p-3 border-none rounded-xl w-full items-center justify-center ${getButtonClass()} text-base font-medium`}
