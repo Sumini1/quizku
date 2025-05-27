@@ -33,7 +33,7 @@ const PapanPeringkat = () => {
   return (
     <div className="flex flex-col min-h-screen w-full h-full">
       <div
-        className={`py-2 flex flex-col text-xl flex-grow max-w-md mx-auto w-full bg-white `}
+        className={`py-2 flex flex-col text-xl flex-grow max-w-md mx-auto w-full h-full ${middleTheme()}`}
       >
         {/* Header */}
         <div className="flex p-5 items-center gap-2">
@@ -85,7 +85,7 @@ const PapanPeringkat = () => {
                           : "bg-[#EEE] text-[#222222]"
                       }`}
                     >
-                      <h5 className="font-normal text-sm">{item.name}</h5>
+                      <h5 className="font-normal text-xs">{item.name}</h5>
                     </div>
                   ))}
                 </div>
@@ -123,7 +123,7 @@ const PapanPeringkat = () => {
                           : "bg-[#EEE] text-[#222222]"
                       }`}
                     >
-                      <h5 className="font-normal text-sm">{item.name}</h5>
+                      <h5 className="font-normal text-xs">{item.name}</h5>
                     </div>
                   ))}
                 </div>

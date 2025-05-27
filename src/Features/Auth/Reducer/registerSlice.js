@@ -6,7 +6,7 @@ export const fetchRegister = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        "https://quizku-production.up.railway.app/auth/register",
+        "https://quizku-production-ad7d.up.railway.app/auth/register",
         {
           method: "POST",
           headers: {

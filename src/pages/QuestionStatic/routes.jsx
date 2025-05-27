@@ -10,6 +10,9 @@ import PageDelapan from "./QuestionPages/PageDelapan";
 import PageSembilan from "./QuestionPages/PageSembilan";
 import PageSepuluh from "./QuestionPages/PageSepuluh";
 import PageSebelas from "./QuestionPages/PageSebelas";
+import PapanPeringkatPrestasi from "./ModalTutorialPengguna/PapanPeringkatPrestasi";
+import PapanPeringkatNamaPrestasi from "./ModalTutorialPengguna/PapanPeringkatNamaPrestasi";
+
 
 export const questionRoutes = [
   {
@@ -56,4 +59,13 @@ export const questionRoutes = [
     path: "/page-sebelas",
     element: <PageSebelas />,
   },
+  {
+      path: "/papan-peringkat-prestasi",
+      element: <PapanPeringkatPrestasi />,
+  },
+  {
+      path: "/papan-peringkat-nama-prestasi",
+      element: <PapanPeringkatNamaPrestasi />,
+  },
+ 
 ];

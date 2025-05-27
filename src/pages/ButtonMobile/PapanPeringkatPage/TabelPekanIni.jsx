@@ -121,12 +121,12 @@ const TabelPekanIni = () => {
             </p>
 
             <div className="flex gap-2">{item.icon}</div>
-            <p className=" text-center">{item.name}</p>
+            <p className=" text-center text-sm font-normal">{item.name}</p>
             <p className=" text-center text-[9px] bg-[#83F9B6] p-2 w-7 h-5  rounded-xl whitespace-nowrap items-center flex justify-center">
               {item.level}
             </p>
           </div>
-          <p className="w-16 items-center font-medium text-sm flex justify-center">
+          <p className="w-16 items-center font-normal text-sm flex justify-center">
             {item.point} <span className="text-sm ml-1">Point</span>
           </p>
         </div>

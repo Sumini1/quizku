@@ -104,7 +104,7 @@ import Cookies from "js-cookie";
 
 // Buat instance axios dengan konfigurasi dasar
 const api = axios.create({
-  baseURL: "https://quizku-production.up.railway.app/api",
+  baseURL: "https://quizku-production-ad7d.up.railway.app/api",
   headers: {
     "Content-Type": "application/json",
   },

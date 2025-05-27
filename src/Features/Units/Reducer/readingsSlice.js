@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../Auth/Reducer/axios";
 
-// Ambil semua readings
+// Ambil semua readings (langsung array)
 export const fetchReadings = createAsyncThunk(
   "readings/fetch",
   async (_, { rejectWithValue }) => {
@@ -9,18 +9,37 @@ export const fetchReadings = createAsyncThunk(
       const response = await api.get("/u/readings");
       const responseData = response.data;
 
-      if (!responseData.data || !Array.isArray(responseData.data)) {
+      if (!Array.isArray(responseData)) {
         throw new Error("Format data tidak valid");
       }
 
-      return responseData;
+      return responseData; // langsung array
     } catch (error) {
       return rejectWithValue(error?.message || "Tolong login kembali");
     }
   }
 );
 
-// Ambil reading berdasarkan ID (convert tooltips)
+// readings by unitId (masih gunakan data: [...] dari response)
+export const fetchReadingsByUnitId = createAsyncThunk(
+  "readingsByUnitId/fetch",
+  async (unitId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/u/readings/${unitId}`);
+      const responseData = response.data;
+
+      if (!responseData.data || !Array.isArray(responseData.data)) {
+        throw new Error("Format data tidak valid");
+      }
+
+      return responseData.data; // hanya array
+    } catch (error) {
+      return rejectWithValue(error?.message || "Tolong login kembali");
+    }
+  }
+);
+
+// Ambil reading berdasarkan ID (untuk convert tooltips)
 export const fetchReadingsByIdConverTooltips = createAsyncThunk(
   "readingsById/fetch",
   async (id, { rejectWithValue }) => {
@@ -28,11 +47,11 @@ export const fetchReadingsByIdConverTooltips = createAsyncThunk(
       const response = await api.get(`/u/readings/${id}`);
       const responseData = response.data;
 
-      if (!responseData.data || !Array.isArray(responseData.data)) {
+      if (!responseData.data || typeof responseData.data !== "object") {
         throw new Error("Format data tidak valid");
       }
 
-      return responseData;
+      return responseData.data;
     } catch (error) {
       return rejectWithValue(error?.message || "Tolong login kembali");
     }
@@ -42,7 +61,7 @@ export const fetchReadingsByIdConverTooltips = createAsyncThunk(
 const readingsSlice = createSlice({
   name: "readings",
   initialState: {
-    data: [],
+    data: [], // semua readings
     status: "idle",
     error: null,
     detailConvert: null,
@@ -57,7 +76,7 @@ const readingsSlice = createSlice({
       })
       .addCase(fetchReadings.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.data = action.payload;
+        state.data = action.payload; // langsung array
       })
       .addCase(fetchReadings.rejected, (state, action) => {
         state.status = "failed";
@@ -71,9 +90,23 @@ const readingsSlice = createSlice({
       })
       .addCase(fetchReadingsByIdConverTooltips.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.detailConvert = action.payload;
+        state.detailConvert = action.payload; // object
       })
       .addCase(fetchReadingsByIdConverTooltips.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+
+      // Fetch readings by unitId
+      .addCase(fetchReadingsByUnitId.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(fetchReadingsByUnitId.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.data = action.payload; // langsung array
+      })
+      .addCase(fetchReadingsByUnitId.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
       });

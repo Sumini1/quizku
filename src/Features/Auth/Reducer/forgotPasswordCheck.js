@@ -5,7 +5,7 @@ export const fetchForgotPassword = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        "https://quizku-production.up.railway.app/auth/forgot-password/check",
+        "https://quizku-production-ad7d.up.railway.app/auth/forgot-password/check",
         {
           method: "POST",
           headers: {
@@ -36,7 +36,7 @@ export const fetchForgotPasswordReset = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        "https://quizku-production.up.railway.app/auth/forgot-password/reset",
+        "https://quizku-production-ad7d.up.railway.app/auth/forgot-password/reset",
         {
           method: "POST",
           headers: {

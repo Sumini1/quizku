@@ -13,7 +13,7 @@ export const fetchLogin = createAsyncThunk(
       }
 
       const response = await axios.post(
-        "https://quizku-production.up.railway.app/auth/login",
+        "https://quizku-production-ad7d.up.railway.app/auth/login",
         {
           identifier: userData.identifier,
           password: userData.password,
@@ -119,7 +119,7 @@ export const refreshAccessToken = createAsyncThunk(
       }
 
       const response = await axios.post(
-        "https://quizku-production.up.railway.app/auth/refresh-token",
+        "https://quizku-production-ad7d.up.railway.app/auth/refresh-token",
         { refresh_token },
         { headers: { "Content-Type": "application/json" } }
       );

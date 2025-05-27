@@ -56,7 +56,7 @@ const ProgressDetail = () => {
       id: 2,
       name: "Pemula",
       level: "Pangkat",
-      link: "/pangkat",
+      link: "/progress/pangkat",
       icon: <img src={pemula} alt="pemula" />,
     },
     {

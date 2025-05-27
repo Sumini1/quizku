@@ -54,7 +54,7 @@ const SurveyTestLevels = () => {
     tingkatan.find((tingkat) => tingkat.id === selectTingkatan)?.route || "#";
 
   return (
-    <div className="flex flex-col w-full mx-auto h-screen overflow-hidden md:p-0">
+    <div className="flex flex-col w-full mx-auto h-screen overflow-auto md:p-0">
       <div
         className={`w-full max-w-md mx-auto h-screen overflow-auto flex flex-col justify-between ${middleTheme()}  relative`}
       >

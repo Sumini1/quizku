@@ -8,18 +8,18 @@ import { MdOutlineError, MdInfo } from "react-icons/md";
 import { MdOutlineFormatListBulleted } from "react-icons/md";
 import { HiInformationCircle } from "react-icons/hi";
 
-const Aqidah = () => {
+const Subcategories = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { data, status } = useSelector((state) => state.subcategory);
-  const userId = localStorage.getItem("id");
   const location = useLocation();
   const { middleTheme, getIconColorAlert, getBorder, getButtonClass } =
     useTheme();
-  const { id } = useParams();
-  const difficultyId = location.state?.difficultyId;
+  const { id } = useParams(); // This should be categories_id
 
+  // Get data from navigation state
   const categoryDetails = location.state?.categoryDetails;
+  const difficultyId = location.state?.difficultyId;
 
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [viewingThemes, setViewingThemes] = useState(false);
@@ -30,54 +30,13 @@ const Aqidah = () => {
   const [popupMessage, setPopupMessage] = useState("");
 
   useEffect(() => {
-    if (userId && difficultyId) {
-      dispatch(fetchSubcategory({ userId, difficultyId }));
+    if (difficultyId) {
+      dispatch(fetchSubcategory(difficultyId));
     }
-  }, [dispatch, userId, difficultyId]);
+  }, [dispatch, difficultyId]);
 
   useEffect(() => {
-    // Generate progress values once when data is loaded
-    if (data && data.length > 0) {
-      const currentCategory =
-        data.find((cat) => cat.id === categoryDetails?.id) || null;
-      if (currentCategory?.subcategories) {
-        const progressData = { ...subcategoryProgress }; // Pertahankan nilai yang sudah ada
-
-        currentCategory.subcategories.forEach((subcategory) => {
-          // Hanya buat progress jika belum ada di state
-          if (
-            subcategory.progress === undefined &&
-            subcategory.themes_or_levels?.length > 0 &&
-            !progressData[subcategory.id] // Tambahkan pengecekan ini
-          ) {
-            const total = subcategory.themes_or_levels.length;
-            // Gunakan ID subcategory sebagai seed untuk random yang konsisten
-            const seed = parseInt(
-              subcategory.id.toString().replace(/[^0-9]/g, "") || "1"
-            );
-            if (!progressData[subcategory.id]) {
-              progressData[subcategory.id] = 0;
-            }
-
-          } else if (subcategory.progress !== undefined) {
-            // Gunakan progress yang sudah ada dari data jika tersedia
-            progressData[subcategory.id] = subcategory.progress;
-          }
-        });
-
-        setSubcategoryProgress(progressData);
-
-        // Simpan ke localStorage untuk persistensi
-        localStorage.setItem(
-          "subcategoryProgress",
-          JSON.stringify(progressData)
-        );
-      }
-    }
-  }, [data, categoryDetails]);
-
-  // Tambahkan useEffect untuk memuat progress dari localStorage saat komponen mount
-  useEffect(() => {
+    // Load progress from localStorage when component mounts
     const savedProgress = localStorage.getItem("subcategoryProgress");
     if (savedProgress) {
       try {
@@ -88,6 +47,42 @@ const Aqidah = () => {
     }
   }, []);
 
+  useEffect(() => {
+    // Generate progress values once when data is loaded
+    if (data && data.length > 0) {
+      const currentCategory = data.find(
+        (cat) => cat.categories_id === parseInt(id)
+      );
+
+      if (currentCategory?.subcategories_progress) {
+        const progressData = { ...subcategoryProgress };
+
+        currentCategory.subcategories_progress.forEach((subcategory) => {
+          if (!progressData[subcategory.subcategory_id]) {
+            // Calculate progress based on themes_with_progress
+            const totalThemes = subcategory.themes_with_progress?.length || 0;
+            if (totalThemes > 0) {
+              const completedThemes = subcategory.themes_with_progress.filter(
+                (theme) => theme.user_has_theme_progress
+              ).length;
+              progressData[subcategory.subcategory_id] = Math.round(
+                (completedThemes / totalThemes) * 100
+              );
+            } else {
+              progressData[subcategory.subcategory_id] = 0;
+            }
+          }
+        });
+
+        setSubcategoryProgress(progressData);
+        localStorage.setItem(
+          "subcategoryProgress",
+          JSON.stringify(progressData)
+        );
+      }
+    }
+  }, [data, id, subcategoryProgress]);
+
   const handleBack = () => {
     if (viewingThemes) {
       setViewingThemes(false);
@@ -97,13 +92,13 @@ const Aqidah = () => {
     }
   };
 
-  // Function to close popup
   const handleClosePopup = () => {
     setShowPopup(false);
   };
 
+  // Find current category based on the ID from URL params
   const currentCategory =
-    data?.find((cat) => cat.id === categoryDetails?.id) || null;
+    data?.find((cat) => cat.categories_id === parseInt(id)) || null;
 
   const getProgressColor = (percentage) => {
     if (percentage >= 70) return "bg-blue-500";
@@ -113,33 +108,31 @@ const Aqidah = () => {
 
   const getProgressForSubcategory = (subcategory) => {
     if (
-      !subcategory.themes_or_levels ||
-      subcategory.themes_or_levels.length === 0
+      !subcategory.themes_with_progress ||
+      subcategory.themes_with_progress.length === 0
     ) {
       return null;
     }
 
-    if (subcategory.progress !== undefined) return subcategory.progress;
-
-    return subcategoryProgress[subcategory.id] || 0;
+    // Use calculated progress or default to 0
+    return subcategoryProgress[subcategory.subcategory_id] || 0;
   };
 
   const handleSubcategoryClick = (subcategory) => {
     if (
-      subcategory.themes_or_levels &&
-      subcategory.themes_or_levels.length > 0
+      subcategory.themes_with_progress &&
+      subcategory.themes_with_progress.length > 0
     ) {
       setSelectedSubcategory(subcategory);
       setViewingThemes(true);
     } else {
-      // Tampilkan popup alih-alih navigasi
       setPopupMessage("Mohon maaf belum ada tema tersedia");
       setShowPopup(true);
     }
   };
 
   const handleThemeClick = (theme) => {
-    navigate(`/theme-detail/${theme.id}`, {
+    navigate(`/theme-detail/${theme.theme_id}`, {
       state: {
         themeDetails: theme,
         subcategoryDetails: selectedSubcategory,
@@ -190,18 +183,10 @@ const Aqidah = () => {
           </button>
           <h1 className="text-xl font-semibold">
             {viewingThemes
-              ? `Tema: ${selectedSubcategory?.name}`
-              : `Kategori ${categoryDetails?.name}` || "Materi Pembelajaran"}
+              ? `Tema: ${selectedSubcategory?.subcategory_name}`
+              : `Kategori ${currentCategory?.categories_name}` ||
+                "Materi Pembelajaran"}
           </h1>
-        </div>
-
-        <div>
-          {!viewingThemes &&
-            currentCategory?.themes_or_levels?.map((theme) => (
-              <div key={theme.id}>
-                <p>{theme.name}</p>
-              </div>
-            ))}
         </div>
 
         {/* Content */}
@@ -209,24 +194,25 @@ const Aqidah = () => {
         {status === "succeeded" && (
           <div>
             {!viewingThemes ? (
-              currentCategory?.subcategories?.length > 0 ? (
+              currentCategory?.subcategories_progress?.length > 0 ? (
                 <div className="mt-3 flex flex-col gap-3">
-                  {currentCategory.subcategories.map((subcategory) => {
+                  {currentCategory.subcategories_progress.map((subcategory) => {
                     const progress = getProgressForSubcategory(subcategory);
-                    const hasThemes = subcategory.themes_or_levels?.length > 0;
+                    const hasThemes =
+                      subcategory.themes_with_progress?.length > 0;
                     const progressColor =
                       progress !== null ? getProgressColor(progress) : "";
 
                     return (
                       <div
-                        key={subcategory.id}
+                        key={subcategory.subcategory_id}
                         className="cursor-pointer"
                         onClick={() => handleSubcategoryClick(subcategory)}
                       >
                         <div className="flex flex-col border-2 rounded-xl p-3">
                           <div className="flex justify-between items-center">
                             <h3 className="text-base font-medium">
-                              {subcategory.name}
+                              {subcategory.subcategory_name}
                             </h3>
                             <MdOutlineError
                               className={`${getIconColorAlert()}`}
@@ -234,7 +220,7 @@ const Aqidah = () => {
                           </div>
                           <p className="text-sm font-medium text-gray-600 mt-1">
                             {hasThemes
-                              ? `${subcategory.themes_or_levels.length} tema`
+                              ? `${subcategory.themes_with_progress.length} tema`
                               : "Belum ada tema"}
                           </p>
 
@@ -281,46 +267,42 @@ const Aqidah = () => {
                   </p>
                 </div>
               )
-            ) : // function untuk menampilkan subkategori atau tema
-            selectedSubcategory?.themes_or_levels?.length > 0 ? (
+            ) : // Display themes for selected subcategory
+            selectedSubcategory?.themes_with_progress?.length > 0 ? (
               <div className="flex flex-col gap-3 mt-3">
-                {selectedSubcategory.themes_or_levels.map((theme) => {
-                  console.log("Theme ID:", theme.id);
-                  console.log("total_unit:", theme.total_unit);
-                  console.log("complete_unit:", theme.complete_unit);
+                {selectedSubcategory.themes_with_progress.map((theme) => {
+                  const totalUnits = theme.theme_total_units?.length || 0;
+                  const completedUnits = Object.keys(
+                    theme.user_theme_complete_unit || {}
+                  ).length;
+                  const progressPercentage =
+                    totalUnits > 0
+                      ? Math.round((completedUnits / totalUnits) * 100)
+                      : 0;
 
                   return (
                     <div
-                      key={theme.id}
+                      key={theme.theme_id}
                       className="border-2 rounded-xl p-4 cursor-pointer hover:bg-gray-50 transition-colors"
                       onClick={() => handleThemeClick(theme)}
                     >
-                      <h3 className="font-medium">{theme.name}</h3>
+                      <h3 className="font-medium">{theme.theme_name}</h3>
                       <p className="text-sm text-gray-600 mt-1">
-                        {theme.description_short}
+                        {theme.theme_short_description}
                       </p>
 
-                      {Array.isArray(theme.total_unit) &&
-                        theme.total_unit.length > 0 && (
-                          <div className="mt-2 flex items-center">
-                            <span className="text-sm text-blue-600">
-                              {theme.total_unit.length} Unit
+                      {totalUnits > 0 && (
+                        <div className="mt-2 flex items-center">
+                          <span className="text-sm text-blue-600">
+                            {totalUnits} Unit
+                          </span>
+                          <div className="ml-auto">
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                              {progressPercentage}%
                             </span>
-
-                            {Array.isArray(theme.complete_unit) && (
-                              <div className="ml-auto">
-                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                  {Math.round(
-                                    (theme.complete_unit.length /
-                                      theme.total_unit.length) *
-                                      100
-                                  )}
-                                  %
-                                </span>
-                              </div>
-                            )}
                           </div>
-                        )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -340,4 +322,4 @@ const Aqidah = () => {
   );
 };
 
-export default Aqidah;
+export default Subcategories;

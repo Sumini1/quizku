@@ -5,8 +5,7 @@ import { useTheme } from "../../../Context/ThemeContext";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchDifficulties } from "../Reducer/difficulties";
 import { useNavigate } from "react-router-dom";
-import bukuCategory from "../../../assets/category/bukuCategory.jpeg"
-import { fetchCreateUserSubcategory } from "../../Subcategory/Reducer/subcategory";
+import bukuCategory from "../../../assets/category/bukuCategory.jpeg";
 
 const PilihCategory = () => {
   const {
@@ -30,9 +29,6 @@ const PilihCategory = () => {
     error,
   } = useSelector((state) => state.difficulties);
 
-  // Gunakan user dari state auth jika diperlukan
-//   const { user } = useSelector((state) => state.auth);
-
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchDifficulties());
@@ -48,54 +44,36 @@ const PilihCategory = () => {
   const handleSelectCategory = (categoryId) => setSelectedCategory(categoryId);
 
   const handleContinue = () => {
-    const selected = data.find((category) => category.id === selectedCategory);
+    const selected = data.find(
+      (category) => category.difficulty_id === selectedCategory
+    );
     if (selected) {
-      setIsLoading(true); // Mulai loading
+      setIsLoading(true);
 
-      // Buat subcategory pengguna - identitas pengguna akan diambil dari token di API
-      
-      dispatch(
-        fetchCreateUserSubcategory({
-          subcategory_id: selectedCategory,
-          // tidak perlu mengirim user_id karena akan diambil dari token di backend
-        })
-      )
-        .then(() => {
-          navigate(`/subcategory/${selected.id}`, {
-            state: {
-              selectedCategory,
-              categoryDetails: selected,
-            },
-          });
-        })
-        .catch((error) => {
-          console.error("Gagal membuat user subcategory:", error);
-          // Tetap navigasi meskipun terjadi error
-          navigate(`/subcategory/${selected.id}`, {
-            state: {
-              selectedCategory,
-              categoryDetails: selected,
-            },
-          });
-        })
-        .finally(() => {
-          setIsLoading(false); // Akhiri loading
-        });
+      // Navigasi ke subcategory dengan difficultyId yang benar
+      navigate(`/subcategory/${selected.difficulty_id}`, {
+        state: {
+          selectedDifficultyId: selected.difficulty_id,
+          categoryDetails: selected,
+        },
+      });
+
+      setIsLoading(false);
     } else {
-      // Jika belum memilih kategori
       console.log("Silakan pilih kategori terlebih dahulu");
     }
   };
 
   // Fungsi pembantu untuk menentukan modal mana yang ditampilkan berdasarkan ID kategori
   const renderModalBasedOnCategory = () => {
-    // Cari kategori aktif berdasarkan ID
-    const activeCategory = data.find((category) => category.id === activeModal);
+    const activeCategory = data.find(
+      (category) => category.difficulty_id === activeModal
+    );
 
     if (!activeCategory) return null;
 
-    // Mengembalikan modal yang sesuai berdasarkan nama kategori
-    const categoryName = activeCategory.name.trim().toLowerCase();
+    const categoryName =
+      activeCategory.difficulty_name?.trim().toLowerCase() || "";
 
     if (categoryName.includes("dasar islam")) {
       return (
@@ -106,12 +84,6 @@ const PilihCategory = () => {
         />
       );
     }
-
-    // Add other modal conditions if needed
-    // Example:
-    // if (categoryName.includes("umum")) {
-    //   return <ModalUmum isOpen={true} onClose={handleCloseModal} categoryId={activeModal} />;
-    // }
 
     // Default case
     return (
@@ -156,16 +128,16 @@ const PilihCategory = () => {
         <div className="grid grid-cols-2 gap-x-5 gap-y-6">
           {data.map((category) => (
             <div
-              key={category.id}
+              key={category.difficulty_id}
               className={`relative rounded-xl overflow-hidden shadow-md transition-transform duration-300 hover:scale-105 ${
-                selectedCategory === category.id
+                selectedCategory === category.difficulty_id
                   ? getButtonClassSelected()
                   : "bg-white"
-              } flex flex-col h-[280px]`} // Fixed height for all cards
+              } flex flex-col h-[280px]`}
             >
               <img
                 src={bukuCategory}
-                alt={category.name}
+                alt={category.difficulty_name}
                 className="w-full h-[120px] object-cover"
               />
 
@@ -173,31 +145,33 @@ const PilihCategory = () => {
               <div className="p-2 mx-1 flex flex-col flex-grow">
                 <div className="flex justify-between items-center mb-2">
                   <h1 className="font-semibold text-base md:text-sm">
-                    {category.name}
+                    {category.difficulty_name}
                   </h1>
                   <MdOutlineError
                     className={`text-lg cursor-pointer ${getIconColorAlert()}`}
-                    onClick={() => handleIconClick(category.id)}
+                    onClick={() => handleIconClick(category.difficulty_id)}
                   />
                 </div>
 
                 <div className="flex-grow overflow-y-auto ">
                   <h5 className="text-sm font-light line-clamp-2">
-                    {category.description_long}
+                    {category.difficulty_description_long}
                   </h5>
                 </div>
 
                 {/* Tombol Pilih */}
                 <div className="mt-auto pt-2 ">
                   <button
-                    onClick={() => handleSelectCategory(category.id)}
+                    onClick={() => handleSelectCategory(category.difficulty_id)}
                     className={`w-full py-1 md:py-1 md:text-base rounded-xl text-sm font-medium ${
-                      selectedCategory === category.id
+                      selectedCategory === category.difficulty_id
                         ? "bg-white text-black border text-sm font-medium md:text-base "
                         : "bg-[#DCE6F8] text-[#333]"
                     }`}
                   >
-                    {selectedCategory === category.id ? "Dipilih" : "Pilih"}
+                    {selectedCategory === category.difficulty_id
+                      ? "Dipilih"
+                      : "Pilih"}
                   </button>
                 </div>
               </div>
@@ -209,7 +183,7 @@ const PilihCategory = () => {
         {activeModal && renderModalBasedOnCategory()}
 
         {/* Tombol Lanjutkan */}
-        <div className="relative bottom-0 md:sticky md:bottom-0 md:mt-20 left-0 right-0 flex flex-col justify-center items-center mx-auto w-full max-w-md">
+        <div className="relative bottom-0 md:fixed  md:bottom-0  left-0 right-0 flex flex-col justify-center items-center mx-auto w-full max-w-md md:p-5">
           <button
             onClick={handleContinue}
             disabled={!selectedCategory || isLoading}

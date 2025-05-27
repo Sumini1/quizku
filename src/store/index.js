@@ -32,12 +32,21 @@ import forgotPasswordReducer from "../Features/Auth/Reducer/forgotPasswordCheck"
 import difficultiesReducer from "../Features/Difficulties/Reducer/difficulties";
 import subcategoryReducer from "../Features/Subcategory/Reducer/subcategory";
 import categoriesReducer from "../Features/Difficulties/Reducer/categories";
+import unitsReducer from "../Features/Units/Reducer/unitsSlice";
+import evaluationsReducer from "../Features/Units/Reducer/evaluationsSlice";
+import quizzesReducer from "../Features/Units/Reducer/quizzesSlice";
+import examsReducer from "../Features/Units/Reducer/examsSlice";
+import readingsReducer from "../Features/Units/Reducer/readingsSlice";
+import userUnitsReducer from "../Features/Units/Reducer/userUnitsSlice";
+import evaluationsQuestionsReducer from "../Features/Evaluations/Reducer/evaluationsQuestions"
+import questionLinkReducer from "../Features/Evaluations/Reducer/questionsLink"
 
 // Import thunks
 import {
   refreshAccessToken,
   fetchLogout,
 } from "../Features/Auth/Reducer/loginSlice";
+import { use } from "react";
 
 // Buat store
 export const store = configureStore({
@@ -49,6 +58,14 @@ export const store = configureStore({
     difficulties: difficultiesReducer,
     subcategory: subcategoryReducer,
     categories: categoriesReducer,
+    units: unitsReducer,
+    evaluations: evaluationsReducer,
+    quizzes: quizzesReducer,
+    exams: examsReducer,
+    readings: readingsReducer,
+    userUnits: userUnitsReducer,
+    evaluationsQuestions: evaluationsQuestionsReducer,
+    questionsLink: questionLinkReducer
   },
 });
 

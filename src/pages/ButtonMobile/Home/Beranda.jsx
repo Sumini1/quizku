@@ -31,41 +31,49 @@ const Beranda = () => {
     {
       id: 1,
       name: "Mode Utama",
-      icon: <img src={book} alt="book"  />,
+      link: "/#",
+      icon: <img src={book} alt="book" />,
     },
     {
       id: 2,
-      name: "Kerjasama Lembaga",
-      icon: <img src={quran} alt="quran"  />,
+      name: "Qur'an dan Hadits",
+      link: "/tema-belajar",
+      icon: <img src={quran} alt="quran" />,
     },
     {
       id: 3,
       name: "Agenda Spesial",
-      icon: <img src={kaaba} alt="kaaba"  />,
+      link: "/#",
+      icon: <img src={kaaba} alt="kaaba" />,
     },
     {
       id: 4,
       name: "Tematik Pilihan",
-      icon: <img src={tematik} alt="tematik"  />,
+      link: "/tematik-pilihan",
+      icon: <img src={tematik} alt="tematik" />,
     },
     {
       id: 5,
       name: "Artikel",
-      icon: <img src={artikel} alt="artikel"  />,
+      link: "/artikel",
+      icon: <img src={artikel} alt="artikel" />,
     },
     {
       id: 6,
       name: "Kuis Kilat 1 Menit",
-      icon: <img src={kuisKilat} alt="kuis kilat"  />,
+      link: "/pangkat",
+      icon: <img src={kuisKilat} alt="kuis kilat" />,
     },
     {
       id: 7,
       name: "Ikuti Tantangan",
+      link: "/tantangan",
       icon: <img src={tantangan} alt="tantangan" />,
     },
     {
       id: 8,
       name: "Mode Lainnya",
+      link: "/lainnya",
       icon: <img src={lainnya} alt="lainnya" />,
     },
   ];
@@ -103,28 +111,28 @@ const Beranda = () => {
   const materiTerbaru = [
     {
       id: 1,
-      image: <img src={gambar} alt="" srcset="" />,
+      image: <img src={gambar} alt=""  />,
       name: "Dasar Islam",
       title: "Keimanan",
       ket: "3 Hari yang lalu",
     },
     {
       id: 1,
-      image: <img src={gambar} alt="" srcset="" />,
+      image: <img src={gambar} alt=""  />,
       name: "Dasar Islam",
       title: "Muamalah",
       ket: "3 Hari yang lalu",
     },
     {
       id: 1,
-      image: <img src={gambar} alt="" srcset="" />,
+      image: <img src={gambar} alt=""  />,
       name: "Dasar Islam",
       title: "Keimanan",
       ket: "3 Hari yang lalu",
     },
     {
       id: 1,
-      image: <img src={gambar} alt="" srcset="" />,
+      image: <img src={gambar} alt=""  />,
       name: "Dasar Islam",
       title: "Muamalah",
       ket: "3 Hari yang lalu",
@@ -144,31 +152,31 @@ const Beranda = () => {
       id: 1,
       name: "Toko",
       link: "/toko-berlian",
-      image: <img src={toko} alt="" srcset="" />,
+      image: <img src={toko} alt="toko"  />,
     },
     {
       id: 2,
       name: "Kontributor",
       link: "/settings",
-      image: <img src={kontributor} alt="" srcset="" />,
+      image: <img src={kontributor} alt="kontributor" />,
     },
     {
       id: 3,
       name: "Jelajahi Kami",
       link: "/jelajahi-aplikasi",
-      image: <img src={compass} alt="" srcset="" />,
+      image: <img src={compass} alt="kontributor"  />,
     },
     {
       id: 4,
       name: "Website",
       link: "/settings",
-      image: <img src={website} alt="" srcset="" />,
+      image: <img src={website} alt="kontributor"  />,
     },
     {
       id: 5,
       name: "Notifikasi",
       link: "/notifikasi",
-      image: <img src={notifikasi} alt="" srcset="" />,
+      image: <img src={notifikasi} alt="kontributor"  />,
     },
   ];
 
@@ -304,7 +312,8 @@ const Beranda = () => {
               </h2>
               <div className="grid grid-cols-4 gap-2 mt-1 text-center ">
                 {kotak.map((item) => (
-                  <div
+                  <Link
+                    to={item.link}
                     key={item.id}
                     className="flex flex-col items-center gap-2 "
                   >
@@ -320,7 +329,7 @@ const Beranda = () => {
                     >
                       {item.name}
                     </p>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>

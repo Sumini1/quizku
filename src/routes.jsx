@@ -9,6 +9,10 @@ import { questionRoutes } from "./pages/QuestionStatic/routes";
 import { difficultiesRoutes } from "./Features/Difficulties/routes";
 import { subcategoryRoutes } from "./Features/Subcategory/routes";
 import { buttonMobileRoutes } from './pages/ButtonMobile/routes';
+import { editorRoutes } from "./pages/Editor/routes";
+import { certificateRoutes } from './Features/Certificate/routes';
+import { unitsRoutes } from "./Features/Units/routes";
+import { evaluationsRoutes } from "./Features/Evaluations/routes";
 
 export const routes = [
   {
@@ -25,5 +29,9 @@ export const routes = [
   ...questionRoutes,
   ...difficultiesRoutes,
   ...subcategoryRoutes,
-  ...buttonMobileRoutes
+  ...buttonMobileRoutes,
+  ...editorRoutes,
+  ...certificateRoutes,
+  ...unitsRoutes,
+  ...evaluationsRoutes
 ];

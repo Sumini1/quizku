@@ -15,6 +15,8 @@ import { IoColorPalette } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchLogout } from "../../../Features/Auth/Reducer/loginSlice";
 import Swal from "sweetalert2";
+import laporanDukungan from "../../../assets/lainnya/laporanDukungan.png"
+import handshake from "../../../assets/lainnya/handshake.png"
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -115,15 +117,15 @@ const Settings = () => {
     },
     {
       id: 3,
-      name: "Profil Dukungan Pengguna",
-      icon: <img src="/dukung.png" alt="" />,
+      name: "Laporan Pengguna",
+      icon: <img src={laporanDukungan} alt="laporan" />,
       link: "/profil-pengguna",
       symbol: <RiArrowRightSLine />,
     },
     {
       id: 4,
       name: "Kerjasama",
-      icon: <img src="/handshake.png" alt="" />,
+      icon: <img src={handshake} alt="" />,
       link: "/kontribusi",
       symbol: <RiArrowRightSLine />,
     },

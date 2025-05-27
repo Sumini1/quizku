@@ -127,14 +127,14 @@ const Progress = () => {
       id: 2,
       name: "Pemula",
       level: "Pangkat",
-      link: "/pangkat",
+      link: "/progress/pangkat",
       icon: <img src={pemula} alt="pemula" />,
     },
     {
       id: 3,
       name: 100,
       level: "Pembuatan Soal Materi",
-      link: "/progress/pembuatan-soal",
+      link: "/progress/lencana",
       icon: <img src={soalMateri} alt="soalmateri" />,
     },
     {
@@ -164,7 +164,7 @@ const Progress = () => {
     {
       id: 3,
       //   progress: calculateTotalPoints,
-      link: "/toko-berlian",
+      link: "/progress/toko-berlian",
       position: "Total Berlian",
       icon: <img src={diamond} alt="diamond" />,
     },
@@ -212,7 +212,7 @@ const Progress = () => {
     {
       id: 5,
       name: "Pencapaian Lainnya",
-      link: "#",
+      link: "/progress/hadiah-pencapaian",
       icon: <FaArrowRightLong />,
     },
   ];
@@ -256,7 +256,7 @@ const Progress = () => {
     {
       id: 5,
       name: "Pencapaian Lainnya",
-      link: "#",
+      link: "/progress/lencana",
       icon: <FaArrowRightLong />,
     },
   ];
@@ -399,7 +399,10 @@ const Progress = () => {
                                 {item.type}
                               </h5>
                             </div>
-                            <Link to={"/hadiah-pencapaian"} className="ml-auto">
+                            <Link
+                              to={"/progress/hadiah-pencapaian"}
+                              className="ml-auto"
+                            >
                               <div
                                 className={`flex mx-3 gap-3 justify-center items-center font-bold ${getIconTheme()} ${
                                   item.id === 5 && "text-[#4B4B4B]"
@@ -431,11 +434,12 @@ const Progress = () => {
                 Kumpulkan lencana sebagai bentuk penghargaan atas segala
                 dedikasimu dalam belajar.
               </h5>
-              <div className="grid grid-cols-1 gap-y-0 mt-5">
+              <div className="grid grid-cols-1 gap-y-0 mt-5 relative z-[50]">
                 <div className="grid grid-cols-1 gap-y-0">
                   {lencanaBelajar.map((item, index) => {
                     const itemTheme = lencanaIndex[index % lencanaIndex.length];
                     const isSpecialId = item.id === 5;
+
                     const commonClasses = `flex flex-col w-full p-2 rounded-xl`;
                     const heightClass = isSpecialId
                       ? "h-[40px] justify-center"
@@ -454,50 +458,51 @@ const Progress = () => {
                         : `rounded-t-none rounded-b-none border-[1px] ${getBorderColor()}`;
 
                     return (
-                      <Link to={item.link} key={item.id}>
-                        <div
-                          className={`${commonClasses} ${heightClass} ${themeClasses}`}
-                        >
-                          <div className="flex items-center gap-x-2">
-                            <h5
-                              className={`border-none p-1 w-[30px] mx-3 flex items-center justify-center text-lg h-[30px] font-[500] rounded-full ${
-                                isSpecialId
-                                  ? "bg-transparent text-[#222]"
-                                  : "bg-blue-500 text-white"
-                              }`}
-                            >
-                              {!isSpecialId && item.id}
-                            </h5>
+                      <div key={item.id} className="relative z-[50]">
+                        <Link to={item.link}>
+                          <div
+                            className={`${commonClasses} ${heightClass} ${themeClasses} cursor-pointer`}
+                          >
+                            <div className="flex items-center gap-x-2">
+                              {!isSpecialId && (
+                                <h5 className="border-none p-1 w-[30px] mx-3 flex items-center justify-center text-lg h-[30px] font-[500] rounded-full bg-blue-500 text-white">
+                                  {item.id}
+                                </h5>
+                              )}
 
-                            <div className="flex flex-col">
-                              <h5
-                                className={`font-medium text-base ${
-                                  isSpecialId && "text-center flex -ml-14"
+                              <div className="flex flex-col">
+                                <h5
+                                  className={`font-medium text-base ${
+                                    isSpecialId ? "text-center flex ml-3" : ""
+                                  }`}
+                                >
+                                  {item.name}
+                                </h5>
+                                {!isSpecialId && (
+                                  <h5 className="mt-2 text-sm font-medium">
+                                    {item.type}
+                                  </h5>
+                                )}
+                              </div>
+
+                              <div
+                                className={`ml-auto flex mx-3 gap-3 justify-center items-center font-bold ${getIconTheme()} ${
+                                  isSpecialId ? "text-[#4B4B4B]" : ""
                                 }`}
                               >
-                                {item.name}
-                              </h5>
-                              <h5 className="mt-2 text-sm font-medium">
-                                {item.type}
-                              </h5>
-                            </div>
-                            <div
-                              className={`ml-auto flex mx-3 gap-3 justify-center items-center font-bold ${getIconTheme()} ${
-                                item.id === 5 && "text-[#4B4B4B]"
-                              }`}
-                            >
-                              <h5
-                                className={`font-medium ${
-                                  isSpecialId && "text-xl -mr-2"
-                                }`}
-                              >
-                                {item.icon}
-                              </h5>
-                              <h5>{item.progress}</h5>
+                                <h5
+                                  className={`font-medium ${
+                                    isSpecialId ? "text-xl -mr-2" : ""
+                                  }`}
+                                >
+                                  {item.icon}
+                                </h5>
+                                {!isSpecialId && <h5>{item.progress}</h5>}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </Link>
+                        </Link>
+                      </div>
                     );
                   })}
                 </div>
@@ -506,7 +511,7 @@ const Progress = () => {
           </div>
 
           {/* Sticky Button - Placed inside the main container */}
-          <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto w-full z-50">
+          <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto w-full z-30">
             <ButtonNavbar />
           </div>
         </div>
