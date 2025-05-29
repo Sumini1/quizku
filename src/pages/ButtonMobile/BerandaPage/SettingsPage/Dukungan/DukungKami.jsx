@@ -8,12 +8,9 @@ import { FaHeart } from "react-icons/fa";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { FaPrayingHands } from "react-icons/fa";
 import berita from "../../../../../assets/lainnya/berita.png";
-import doaHarapan from "../../../../../assets/lainnya/doaHarapan.png"
 import informasi from "../../../../../assets/lainnya/informasi.png";
 import latar from "../../../../../assets/lainnya/latar.png";
-import love from "../../../../../assets/lainnya/love.png";
 import riwayat from "../../../../../assets/lainnya/riwayat.png";
-import sertifikatNilai from "../../../../../assets/lainnya/sertifikatNilai.png"
 import lencana from "../../../../../assets/beranda/lencana.png";
 import point from "../../../../../assets/papanPeringkat/point.png";
 import pemula from "../../../../../assets/beranda/pemula.png";
