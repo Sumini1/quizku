@@ -6,7 +6,7 @@ import { useTheme } from "../../../Context/ThemeContext";
 import { fetchUserUnits } from "../Reducer/userUnitsSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { FaAddressBook, FaBook } from "react-icons/fa6";
-import ModalOverView from "../Modals/ModalOverview";
+import ModalOverView from "../Modals/ModalOverView";
 import ModalQuiz from "../Modals/ModalQuiz";
 import { fetchExams } from "../Reducer/examsSlice";
 import { GrHelpBook } from "react-icons/gr";
