@@ -17,7 +17,6 @@
 //   },
 // });
 
-
 import { configureStore } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
 
@@ -38,8 +37,14 @@ import quizzesReducer from "../Features/Units/Reducer/quizzesSlice";
 import examsReducer from "../Features/Units/Reducer/examsSlice";
 import readingsReducer from "../Features/Units/Reducer/readingsSlice";
 import userUnitsReducer from "../Features/Units/Reducer/userUnitsSlice";
-import evaluationsQuestionsReducer from "../Features/Evaluations/Reducer/evaluationsQuestions"
-import questionLinkReducer from "../Features/Evaluations/Reducer/questionsLink"
+import evaluationsQuestionsReducer from "../Features/Evaluations/Reducer/evaluationsQuestions";
+import questionLinkReducer from "../Features/Evaluations/Reducer/questionsLink";
+import userEvaluationsReducer from "../Features/Evaluations/Reducer/userEvaluations";
+import userExamsReducer from "../Features/Exams/Reducer/userExams";
+import examsQuestionsReducer from "../Features/Exams/Reducer/examsQuestions";
+import quizQuestionsReducer from "../Features/Quizzess/Reducer/quizQuestions";
+import userQuizzes from "../Features/Quizzess/Reducer/userQuizzes";
+import userSurveys from "../Features/Survey/Reducer/userSurveys";
 
 // Import thunks
 import {
@@ -65,7 +70,14 @@ export const store = configureStore({
     readings: readingsReducer,
     userUnits: userUnitsReducer,
     evaluationsQuestions: evaluationsQuestionsReducer,
-    questionsLink: questionLinkReducer
+    questionsLink: questionLinkReducer,
+    userEvaluations: userEvaluationsReducer,
+    userExams: userExamsReducer,
+    examsQuestions: examsQuestionsReducer,
+    quizQuestions: quizQuestionsReducer,
+    userQuizzes: userQuizzes,
+    userSurveys: userSurveys
+
   },
 });
 

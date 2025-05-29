@@ -13,6 +13,8 @@ import { editorRoutes } from "./pages/Editor/routes";
 import { certificateRoutes } from './Features/Certificate/routes';
 import { unitsRoutes } from "./Features/Units/routes";
 import { evaluationsRoutes } from "./Features/Evaluations/routes";
+import { examsRoutes } from "./Features/Exams/routes";
+import { quizzesRoutes } from "./Features/Quizzess/routes";
 
 export const routes = [
   {
@@ -33,5 +35,7 @@ export const routes = [
   ...editorRoutes,
   ...certificateRoutes,
   ...unitsRoutes,
-  ...evaluationsRoutes
+  ...evaluationsRoutes,
+  ...examsRoutes,
+  ...quizzesRoutes
 ];

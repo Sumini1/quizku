@@ -1,14 +1,13 @@
-
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchEvaluationsQuestions } from "../Reducer/evaluationsQuestions";
-import { saveUserEvaluationsProgress } from "../Reducer/userEvaluations"; // Add this import
+import { fetchExamsQuestions } from "../Reducer/examsQuestions";
 import { useTheme } from "../../../Context/ThemeContext";
 import { IoClose } from "react-icons/io5";
 import { FaCheckCircle, FaBook, FaHeart } from "react-icons/fa";
 import { MdMenuBook } from "react-icons/md";
 import lamp from "../../../assets/themes_or_levels/lamp.png";
+import { saveUserExamsProgress } from '../Reducer/userExams';
 
 const SkeletonLoader = () => {
   return (
@@ -52,22 +51,22 @@ const SkeletonLoader = () => {
   );
 };
 
-const EvaluationSatu = () => {
+const ExamSatu = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
   const { getButtonClass, getBorderClass, middleTheme } = useTheme();
 
   const { data, loading, error } = useSelector(
-    (state) => state.evaluationsQuestions
+    (state) => state.examsQuestions
   );
 
-  // Add selector for userEvaluations state with fallback
-  const userEvaluationsState = useSelector(
-    (state) => state.userEvaluations || {}
+  // Add selector for userExams state with fallback
+  const userExamsState = useSelector(
+    (state) => state.userExamss || {}
   );
   const { status: saveStatus = "idle", error: saveError = null } =
-    userEvaluationsState;
+    userExamsState;
 
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -78,7 +77,7 @@ const EvaluationSatu = () => {
   const [totalTimeTaken, setTotalTimeTaken] = useState(0);
   const [accumulatedScore, setAccumulatedScore] = useState(0);
   const [showSkeleton, setShowSkeleton] = useState(true);
-  const [evaluationStartTime, setEvaluationStartTime] = useState(null); // Add this for overall evaluation time
+  const [examStartTime, setEvaluationStartTime] = useState(null); // Add this for overall evaluation time
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalReferensiVisible, setIsModalReferensiVisible] = useState(false);
@@ -89,7 +88,7 @@ const EvaluationSatu = () => {
   const currentQuestion = questions[currentIndex];
 
   useEffect(() => {
-    dispatch(fetchEvaluationsQuestions(id));
+    dispatch(fetchExamsQuestions(id));
 
     // Set skeleton minimum duration
     const timer = setTimeout(() => {
@@ -110,7 +109,7 @@ const EvaluationSatu = () => {
   }, [data]);
 
   useEffect(() => {
-    const savedScore = parseInt(localStorage.getItem("evaluationScore")) || 0;
+    const savedScore = parseInt(localStorage.getItem("examsScore")) || 0;
     setAccumulatedScore(savedScore);
   }, []);
 
@@ -136,7 +135,7 @@ const EvaluationSatu = () => {
     setIsModalVisible(true);
   };
 
-  // In the handleNextQuestion function, replace the evaluationData object:
+  // In the handleNextQuestion function, replace the examData object:
 
   const handleNextQuestion = () => {
     if (currentIndex < questions.length - 1) {
@@ -148,15 +147,15 @@ const EvaluationSatu = () => {
       // Calculate final results
       const newAccumulatedScore = accumulatedScore + score;
       const finalPercentage = Math.round((score / questions.length) * 100);
-      const totalEvaluationTime = Math.round(
-        (Date.now() - evaluationStartTime) / 1000
+      const totalExamTime = Math.round(
+        (Date.now() - examStartTime) / 1000
       );
 
       // Validate required fields
-      const evaluationId = parseInt(id);
-      if (!evaluationId || isNaN(evaluationId)) {
-        console.error("Invalid evaluation ID:", id);
-        alert("Error: Invalid evaluation ID");
+      const examId = parseInt(id);
+      if (!examId || isNaN(examId)) {
+        console.error("Invalid exam ID:", id);
+        alert("Error: Invalid exam ID");
         return;
       }
 
@@ -167,16 +166,16 @@ const EvaluationSatu = () => {
       }
 
       // Prepare data for API with correct field names
-      const evaluationData = {
-        user_evaluation_evaluation_id: evaluationId, // Changed from user_evaluation_id
-        user_evaluation_unit_id: 2,
-        user_evaluation_attempt: 1,
-        user_evaluation_percentage_grade: finalPercentage, // This field is already correct
-        user_evaluation_time_duration: totalEvaluationTime,
-        user_evaluation_point: newAccumulatedScore,
+      const examData = {
+        user_exam_exam_id: examId, // Changed from user_evaluation_id
+        user_exam_unit_id: 2,
+        user_exam_attempt: 1,
+        user_exam_percentage_grade: finalPercentage, // This field is already correct
+        user_exam_time_duration: totalExamTime,
+        user_exam_point: newAccumulatedScore,
       };
 
-      console.log("Evaluation Data being sent:", evaluationData);
+      console.log("Evaluation Data being sent:", examData);
       console.log(
         "Score:",
         score,
@@ -187,11 +186,11 @@ const EvaluationSatu = () => {
       );
 
       // Save progress to API
-      dispatch(saveUserEvaluationsProgress(evaluationData))
+      dispatch(saveUserExamsProgress(examData))
         .then((result) => {
           if (
             result.type ===
-            "userEvaluations/saveUserEvaluationsProgress/fulfilled"
+            "userExams/saveUserExamsProgress/fulfilled"
           ) {
             console.log("Progress saved successfully:", result.payload);
           } else {
@@ -203,14 +202,14 @@ const EvaluationSatu = () => {
         });
 
       // Save to localStorage for local state
-      localStorage.setItem("evaluationScore", newAccumulatedScore.toString());
+      localStorage.setItem("examsScore", newAccumulatedScore.toString());
 
       // Navigate to results page
-      navigate("/pemula/evaluation-satu/final-scored", {
+      navigate("/pemula/exam-satu/final-scored", {
         state: {
           score,
           totalQuestions: questions.length,
-          timeTaken: totalEvaluationTime,
+          timeTaken: totalExamTime,
           totalPoints: newAccumulatedScore,
           percentage: finalPercentage,
         },
@@ -233,7 +232,7 @@ const EvaluationSatu = () => {
       <div className="container mx-auto p-4 text-center">
         <p className="text-red-500">Error: {error}</p>
         <button
-          onClick={() => dispatch(fetchEvaluationsQuestions(id))}
+          onClick={() => dispatch(fetchExamsQuestions(id))}
           className="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           Coba Lagi
@@ -341,7 +340,7 @@ const EvaluationSatu = () => {
             <img
               src={lamp}
               onClick={handleModalRefensi}
-              className="border text-4xl mt-1 border-none cursor-pointer rounded-xl"
+              className="border text-4xl mt-1 border-none cursor-pointer"
               alt="Hint"
             />
             <button
@@ -569,4 +568,4 @@ const EvaluationSatu = () => {
   );
 };
 
-export default EvaluationSatu;
+export default ExamSatu;

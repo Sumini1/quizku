@@ -284,6 +284,7 @@ const TemaBelajar = () => {
             onClose={closeModal}
             unitId={activeUnitId}
             sectionQuiz={activeSectionQuiz}
+            quizId={activeSectionQuiz?.quizzes?.[0]?.id || null} // ✅ kirim quiz.id
           />
         )}
 
