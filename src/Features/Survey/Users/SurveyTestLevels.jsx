@@ -1,105 +1,89 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTheme } from "../../../Context/ThemeContext";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { openModal } from "../../../pages/QuestionStatic/Reducer/modalSlice";
+import { fetchTestExams } from "../Reducer/testExams";
 
 const SurveyTestLevels = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const {
-    theme,
-    getButtonClassListCategory,
-    getBorderClass,
-    getBorder,
-    middleTheme,
-  } = useTheme();
+  const { theme, getButtonClassListCategory, getBorderClass, middleTheme } =
+    useTheme();
+
   const [selectTingkatan, setSelectTingkatan] = useState(null);
 
-  const handleClick = () => {
-    dispatch(openModal()); // Aktifkan modal di Redux state
-    navigate("/page-dua"); // Pindah ke halaman 2
+  const exams = useSelector((state) => state.testExams.data);
+
+  useEffect(() => {
+    dispatch(fetchTestExams());
+  }, [dispatch]);
+
+const handleClick = () => {
+  if (selectTingkatan) {
+    dispatch(openModal());
+    navigate(`/survey-test/${selectTingkatan}`);
+  }
+};
+
+
+  const handleSelectTingkatan = (id) => {
+    setSelectTingkatan(id);
   };
 
-  const handleSelectTingkatan = (tingkatanId) => {
-    setSelectTingkatan(tingkatanId);
-  };
+const selectedRoute = selectTingkatan ? `/survey-test/${selectTingkatan}` : "#";
 
-  const tingkatan = [
-    { id: 1, tingkatan: "Pemula", route: "/page-satu" },
-    { id: 2, tingkatan: "Dasar", route: "/list-category-dasar" },
-    { id: 3, tingkatan: "Menengah", route: "/list-category-menengah" },
-    {
-      id: 4,
-      tingkatan: "Menengah Lanjutan",
-      route: "/list-category-menengah-lanjutan",
-    },
-    { id: 5, tingkatan: "Lanjutan", route: "/list-category-lanjutan" },
-    {
-      id: 6,
-      tingkatan: "Lanjutan Tinggi",
-      route: "/list-category-lanjutan-tinggi",
-    },
-    { id: 7, tingkatan: "Ahli", route: "/list-category-ahli" },
-    {
-      id: 8,
-      tingkatan: "Makhluk Allah",
-      route: "/list-category-makhluk-allah",
-    },
-  ];
-
-  // Mendapatkan rute berdasarkan tingkatan yang dipilih
-  const selectedRoute =
-    tingkatan.find((tingkat) => tingkat.id === selectTingkatan)?.route || "#";
 
   return (
     <div className="flex flex-col w-full mx-auto h-screen overflow-auto md:p-0">
       <div
-        className={`w-full max-w-md mx-auto h-screen overflow-auto flex flex-col justify-between ${middleTheme()}  relative`}
+        className={`w-full max-w-md mx-auto h-screen overflow-auto flex flex-col ${middleTheme()}  relative`}
       >
         <div className="flex flex-col mt-5 mx-5">
           <h1 className="text-xl font-semibold">Tes Pengetahuan Islam</h1>
           <h2 className="text-lg font-medium mt-3 mb-2">Mulai</h2>
           <p className="text-md ">Pilih tingkatan level</p>
         </div>
-        <form action="" className="mx-5 mt-3">
-          <div>
-            {tingkatan.map((tingkat) => (
-              <button
-                key={tingkat.id}
-                type="button"
-                onClick={() => handleSelectTingkatan(tingkat.id)}
-                className={` w-full text-left rounded-xl p-3 pl-4  mb-4 border-[2px]  ${getButtonClassListCategory(
-                  selectTingkatan === tingkat.id
-                )}`}
-              >
-                {tingkat.tingkatan}
-              </button>
-            ))}
-            <div className=" mt-5">
-              <p className="text-sm">
+
+        <div className="flex-1 flex items-center justify-center pb-32">
+          <form action="" className="mx-5 w-full gap-2 ">
+            <div>
+              {exams.map((exam) => (
+                <button
+                  key={exam.test_exam_id}
+                  type="button"
+                  onClick={() => handleSelectTingkatan(exam.test_exam_id)}
+                  className={`w-full text-left rounded-xl p-3 pl-4 mb-4 border-[2px]  ${getButtonClassListCategory(
+                    selectTingkatan === exam.test_exam_id
+                  )}`}
+                >
+                  {exam.test_exam_name}
+                </button>
+              ))}
+            </div>
+
+            <div className="fixed bottom-0 left-0 right-0 p-5 max-w-md mx-auto mt-20">
+              <p className="text-sm mb-3">
                 * Pilihan level tidak mempengaruhi apapun. Hanya untuk mengukur
                 kemampuan diri.
               </p>
-            </div>
-            <div className="flex justify-center items-center mt-7">
               <Link to={selectedRoute} className="w-full">
                 <button
                   onClick={handleClick}
                   type="button"
-                  className={`p-3 mb-10 w-full  border-none rounded-xl ${getBorderClass()} ${
+                  className={`p-3 w-full border-none rounded-xl ${getBorderClass()} ${
                     selectTingkatan
                       ? theme === "dark"
-                        ? "bg-gray-800 text-white "
+                        ? "bg-gray-800 text-white"
                         : theme === "cupcake"
-                        ? "bg-pink-500 text-white border-[#FFE6FA]   "
+                        ? "bg-pink-500 text-white border-[#FFE6FA]"
                         : theme === "bumblebee"
-                        ? "bg-yellow-500 text-white "
+                        ? "bg-yellow-500 text-white"
                         : theme === "lemonade"
-                        ? "bg-[#027A7D] text-white "
-                        : "bg-[hsl(218,93%,50%)] text-white  "
-                      : "bg-[#0961F5] text-[#0961F5]   "
+                        ? "bg-[#027A7D] text-white"
+                        : "bg-[hsl(218,93%,50%)] text-white"
+                      : "bg-[#0961F5] text-[#0961F5]"
                   }`}
                   disabled={!selectTingkatan}
                 >
@@ -107,8 +91,8 @@ const SurveyTestLevels = () => {
                 </button>
               </Link>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

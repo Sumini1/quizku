@@ -43,8 +43,12 @@ import userEvaluationsReducer from "../Features/Evaluations/Reducer/userEvaluati
 import userExamsReducer from "../Features/Exams/Reducer/userExams";
 import examsQuestionsReducer from "../Features/Exams/Reducer/examsQuestions";
 import quizQuestionsReducer from "../Features/Quizzess/Reducer/quizQuestions";
-import userQuizzes from "../Features/Quizzess/Reducer/userQuizzes";
-import userSurveys from "../Features/Survey/Reducer/userSurveys";
+import userQuizzesReducer from "../Features/Quizzess/Reducer/userQuizzes";
+import userSurveysReducer from "../Features/Survey/Reducer/userSurveys";
+import questionsSurveyReducer from "../Features/Survey/Reducer/questionsSurvey";
+import testExamsReducer from "../Features/Survey/Reducer/testExams";
+import questionsTestReducer  from "../Features/Survey/Reducer/questionsTest";
+import userTestReducer from "../Features/Survey/Reducer/userTest";
 
 // Import thunks
 import {
@@ -75,8 +79,12 @@ export const store = configureStore({
     userExams: userExamsReducer,
     examsQuestions: examsQuestionsReducer,
     quizQuestions: quizQuestionsReducer,
-    userQuizzes: userQuizzes,
-    userSurveys: userSurveys
+    userQuizzes: userQuizzesReducer,
+    userSurveys: userSurveysReducer,
+    questionsSurvey: questionsSurveyReducer,
+    testExams: testExamsReducer,
+    questionsTest: questionsTestReducer,
+    userTest: userTestReducer
 
   },
 });

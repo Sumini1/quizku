@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchEvaluationsQuestions } from "../Reducer/evaluationsQuestions";
-import { saveUserEvaluationsProgress } from "../Reducer/userEvaluations"; // Add this import
+import { fetchQuestionsTest } from "../Reducer/questionsTest";
+import { saveUserSurveysProgress } from "../Reducer/userTest"; // Add this import
 import { useTheme } from "../../../Context/ThemeContext";
 import { IoClose } from "react-icons/io5";
 import { FaCheckCircle, FaBook, FaHeart } from "react-icons/fa";
@@ -52,22 +51,20 @@ const SkeletonLoader = () => {
   );
 };
 
-const EvaluationSatu = () => {
+const SurveyTest = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
   const { getButtonClass, getBorderClass, middleTheme } = useTheme();
 
-  const { data, loading, error } = useSelector(
-    (state) => state.evaluationsQuestions
-  );
+  const { data, loading, error } = useSelector((state) => state.questionsTest);
 
   // Add selector for userEvaluations state with fallback
-  const userEvaluationsState = useSelector(
-    (state) => state.userEvaluations || {}
+  const userTest = useSelector(
+    (state) => state.userTest || {}
   );
   const { status: saveStatus = "idle", error: saveError = null } =
-    userEvaluationsState;
+    userTest;
 
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -78,7 +75,7 @@ const EvaluationSatu = () => {
   const [totalTimeTaken, setTotalTimeTaken] = useState(0);
   const [accumulatedScore, setAccumulatedScore] = useState(0);
   const [showSkeleton, setShowSkeleton] = useState(true);
-  const [evaluationStartTime, setEvaluationStartTime] = useState(null); // Add this for overall evaluation time
+  const [testStartTime, setTestStartTime] = useState(null); // Add this for overall evaluation time
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalReferensiVisible, setIsModalReferensiVisible] = useState(false);
@@ -89,7 +86,7 @@ const EvaluationSatu = () => {
   const currentQuestion = questions[currentIndex];
 
   useEffect(() => {
-    dispatch(fetchEvaluationsQuestions(id));
+    dispatch(fetchQuestionsTest(id));
 
     // Set skeleton minimum duration
     const timer = setTimeout(() => {
@@ -102,7 +99,7 @@ const EvaluationSatu = () => {
   useEffect(() => {
     setQuestions(data || []);
     setStartTime(Date.now());
-    setEvaluationStartTime(Date.now()); // Set overall evaluation start time
+    setTestStartTime(Date.now()); // Set overall evaluation start time
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "auto";
@@ -110,7 +107,7 @@ const EvaluationSatu = () => {
   }, [data]);
 
   useEffect(() => {
-    const savedScore = parseInt(localStorage.getItem("evaluationScore")) || 0;
+    const savedScore = parseInt(localStorage.getItem("testScore")) || 0;
     setAccumulatedScore(savedScore);
   }, []);
 
@@ -148,15 +145,15 @@ const EvaluationSatu = () => {
       // Calculate final results
       const newAccumulatedScore = accumulatedScore + score;
       const finalPercentage = Math.round((score / questions.length) * 100);
-      const totalEvaluationTime = Math.round(
-        (Date.now() - evaluationStartTime) / 1000
+      const totalTestTime = Math.round(
+        (Date.now() - testStartTime) / 1000
       );
 
       // Validate required fields
-      const evaluationId = parseInt(id);
-      if (!evaluationId || isNaN(evaluationId)) {
-        console.error("Invalid evaluation ID:", id);
-        alert("Error: Invalid evaluation ID");
+      const testId = parseInt(id);
+      if (!testId || isNaN(testId)) {
+        console.error("Invalid test ID:", id);
+        alert("Error: Invalid test ID");
         return;
       }
 
@@ -168,12 +165,12 @@ const EvaluationSatu = () => {
 
       // Prepare data for API with correct field names
       const evaluationData = {
-        user_evaluation_evaluation_id: evaluationId, // Changed from user_evaluation_id
-        user_evaluation_unit_id: 2,
-        user_evaluation_attempt: 1,
-        user_evaluation_percentage_grade: finalPercentage, // This field is already correct
-        user_evaluation_time_duration: totalEvaluationTime,
-        user_evaluation_point: newAccumulatedScore,
+        user_test_exam_test_exam_id: testId, // Changed from user_evaluation_id
+        user_test_unit_id: 2,
+        user_test_attempt: 1,
+        user_test_exam_percentage_grade: finalPercentage, // This field is already correct
+        user_test_exam_time_duration: totalTestTime,
+        user_test_exam_point: newAccumulatedScore,
       };
 
       console.log("Evaluation Data being sent:", evaluationData);
@@ -187,11 +184,11 @@ const EvaluationSatu = () => {
       );
 
       // Save progress to API
-      dispatch(saveUserEvaluationsProgress(evaluationData))
+      dispatch(saveUserSurveysProgress(evaluationData))
         .then((result) => {
           if (
             result.type ===
-            "userEvaluations/saveUserEvaluationsProgress/fulfilled"
+            "userEvaluations/saveUserSurveysProgress/fulfilled"
           ) {
             console.log("Progress saved successfully:", result.payload);
           } else {
@@ -206,11 +203,11 @@ const EvaluationSatu = () => {
       localStorage.setItem("evaluationScore", newAccumulatedScore.toString());
 
       // Navigate to results page
-      navigate("/pemula/evaluation-satu/final-scored", {
+      navigate("/pemula/test-exams/final-scored", {
         state: {
           score,
           totalQuestions: questions.length,
-          timeTaken: totalEvaluationTime,
+          timeTaken: totalTestTime,
           totalPoints: newAccumulatedScore,
           percentage: finalPercentage,
         },
@@ -233,7 +230,7 @@ const EvaluationSatu = () => {
       <div className="container mx-auto p-4 text-center">
         <p className="text-red-500">Error: {error}</p>
         <button
-          onClick={() => dispatch(fetchEvaluationsQuestions(id))}
+          onClick={() => dispatch(fetchQuestionsTest(id))}
           className="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           Coba Lagi
@@ -374,7 +371,7 @@ const EvaluationSatu = () => {
               {/* Overlay redup */}
               <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
-                className={`rounded-xl rounded-b-none w-full m-0 p-6 mt-[550px] items-center justify-center fixed bottom-0 ${
+                className={`rounded-xl rounded-b-none w-full m-0 p-6 mt-[550px] items-center justify-center fixed bottom-0 md:max-w-md ${
                   isAnswerCorrect ? "bg-[#DCFFD9]" : "bg-[#FFD9D9]"
                 }`}
               >
@@ -569,4 +566,4 @@ const EvaluationSatu = () => {
   );
 };
 
-export default EvaluationSatu;
+export default SurveyTest;
