@@ -2,15 +2,15 @@ import React from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../../../Context/ThemeContext";
-import lencana from "../../../../../assets/beranda/lencana.png"
-import moneyBag from "../../../../../assets/lainnya/moneyBag.png"
-import donationBag from "../../../../../assets/lainnya/donationBag.png"
-import gift from "../../../../../assets/lainnya/gift.png"
-import reportFile from "../../../../../assets/lainnya/reportFile.png"
+import lencana from "../../../../../assets/beranda/lencana.png";
+import moneyBag from "../../../../../assets/lainnya/moneyBag.png";
+import donationBag from "../../../../../assets/lainnya/donationBag.png";
+import gift from "@assets/lainnya/gift.png";
+import reportFile from "../../../../../assets/lainnya/reportFile.png";
 
 const ProfilPengguna = () => {
   const navigate = useNavigate();
-    const { middleTheme } = useTheme();
+  const { middleTheme } = useTheme();
   return (
     <div className="flex flex-col min-h-screen w-full h-full">
       <div
@@ -70,11 +70,7 @@ const ProfilPengguna = () => {
               <p className="font-normal text-sm">
                 Apresiasi tertinggi kepada para donatur berupa hadiah istimewa.
               </p>
-              <img
-                src={gift}
-                alt="gift"
-                className="-mt-10 w-[80px] h-[80px]"
-              />
+              <img src={gift} alt="gift" className="-mt-10 w-[80px] h-[80px]" />
             </div>
           </div>
           {/* Kotak 3 */}
