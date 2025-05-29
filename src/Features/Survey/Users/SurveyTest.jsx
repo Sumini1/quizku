@@ -435,9 +435,11 @@ const SurveyTest = () => {
           {/* Modal for Answer Explanation */}
           {isModalAnswerVisible && (
             <div
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-5"
+              className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalAnswerVisible(false)}
             >
+              {/* Overlay redup */}
+              <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
                 className="bg-[#DCFFD9] rounded-lg w-96 relative p-5"
                 onClick={(e) => e.stopPropagation()}
@@ -470,9 +472,11 @@ const SurveyTest = () => {
           {/* Modal for Question Reference */}
           {isModalReferensiVisible && (
             <div
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-5"
+              className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalReferensiVisible(false)}
             >
+              {/* Overlay redup */}
+              <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
                 className="bg-white rounded-lg w-96 relative p-5"
                 onClick={(e) => e.stopPropagation()}
@@ -503,9 +507,11 @@ const SurveyTest = () => {
           {/* Modal for Materi */}
           {isModalMateriOpen && (
             <div
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-5"
+              className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalMateriOpen(false)}
             >
+              {/* Overlay redup */}
+              <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
                 className="bg-white rounded-lg w-96 relative p-5"
                 onClick={(e) => e.stopPropagation()}
@@ -534,9 +540,11 @@ const SurveyTest = () => {
           {/* Modal for Donatur */}
           {isModalDonaturOpen && (
             <div
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-5"
+              className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalDonaturOpen(false)}
             >
+              {/* Overlay redup */}
+              <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
                 className="bg-white rounded-lg w-96 relative p-5"
                 onClick={(e) => e.stopPropagation()}

@@ -43,7 +43,7 @@ const SkeletonLoader = () => {
       </div>
 
       {/* Bottom Action Bar Skeleton */}
-      <div className="fixed bottom-0 left-0 right-0 px-5 py-3 shadow-md flex justify-between gap-2 bg-white">
+      <div className="fixed bottom-0 left-0 right-0 px-5 py-3 shadow-md flex justify-between gap-2 ">
         <div className="w-10 h-10 bg-gray-200 rounded animate-pulse"></div>
         <div className="p-3 w-[370px] h-12 rounded-xl bg-gray-200 animate-pulse"></div>
       </div>
@@ -340,7 +340,7 @@ const ExamSatu = () => {
             <img
               src={lamp}
               onClick={handleModalRefensi}
-              className="border text-4xl mt-1 border-none cursor-pointer"
+              className="border text-4xl mt-1 border-none cursor-pointer rounded-xl"
               alt="Hint"
             />
             <button
@@ -437,9 +437,11 @@ const ExamSatu = () => {
           {/* Modal for Answer Explanation */}
           {isModalAnswerVisible && (
             <div
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-5"
+              className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalAnswerVisible(false)}
             >
+              {/* Overlay redup */}
+              <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
                 className="bg-[#DCFFD9] rounded-lg w-96 relative p-5"
                 onClick={(e) => e.stopPropagation()}
@@ -472,9 +474,11 @@ const ExamSatu = () => {
           {/* Modal for Question Reference */}
           {isModalReferensiVisible && (
             <div
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-5"
+              className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalReferensiVisible(false)}
             >
+              {/* Overlay redup */}
+              <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
                 className="bg-white rounded-lg w-96 relative p-5"
                 onClick={(e) => e.stopPropagation()}
@@ -505,9 +509,11 @@ const ExamSatu = () => {
           {/* Modal for Materi */}
           {isModalMateriOpen && (
             <div
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-5"
+              className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalMateriOpen(false)}
             >
+              {/* Overlay redup */}
+              <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
                 className="bg-white rounded-lg w-96 relative p-5"
                 onClick={(e) => e.stopPropagation()}
@@ -536,9 +542,11 @@ const ExamSatu = () => {
           {/* Modal for Donatur */}
           {isModalDonaturOpen && (
             <div
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-5"
+              className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalDonaturOpen(false)}
             >
+              {/* Overlay redup */}
+              <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
                 className="bg-white rounded-lg w-96 relative p-5"
                 onClick={(e) => e.stopPropagation()}
