@@ -5,7 +5,7 @@ import { useTheme } from "../../../../../Context/ThemeContext";
 import lencana from "../../../../../assets/beranda/lencana.png";
 import moneyBag from "../../../../../assets/lainnya/moneyBag.png";
 import donationBag from "../../../../../assets/lainnya/donationBag.png";
-import gift from "@assets/lainnya/gift.png";
+import gift from "../../../../../assets/lainnya/gift.png";
 import reportFile from "../../../../../assets/lainnya/reportFile.png";
 
 const ProfilPengguna = () => {
