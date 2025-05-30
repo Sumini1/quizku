@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchDifficulties } from "../Reducer/difficulties";
 import { useNavigate } from "react-router-dom";
 import bukuCategory from "../../../assets/category/bukuCategory.jpeg";
+import { fetchCreateUserSubcategory } from "../../Subcategory/Reducer/subcategory";
 
 const PilihCategory = () => {
   const {
@@ -29,6 +30,12 @@ const PilihCategory = () => {
     error,
   } = useSelector((state) => state.difficulties);
 
+  const {
+    data: subcategoryData,
+    status: subcategoryStatus,
+    error: subcategoryError,
+  } = useSelector((state) => state.subcategory);
+
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchDifficulties());
@@ -41,7 +48,28 @@ const PilihCategory = () => {
   };
 
   const handleCloseModal = () => setActiveModal(null);
-  const handleSelectCategory = (categoryId) => setSelectedCategory(categoryId);
+
+  // Modifikasi fungsi handleSelectCategory untuk include create user subcategory
+  const handleSelectCategory = async (categoryId) => {
+    setSelectedCategory(categoryId);
+
+    try {
+      // Dispatch action untuk create user subcategory
+      const payload = {
+        subcategory_id: categoryId, // Menggunakan categoryId sebagai subcategory_id
+      };
+
+      await dispatch(fetchCreateUserSubcategory(payload));
+      console.log(
+        "User subcategory created successfully for category:",
+        categoryId
+      );
+    } catch (error) {
+      console.error("Error creating user subcategory:", error);
+      // Anda bisa menambahkan error handling di sini jika diperlukan
+      // Misalnya menampilkan toast atau alert
+    }
+  };
 
   const handleContinue = () => {
     const selected = data.find(
@@ -168,8 +196,12 @@ const PilihCategory = () => {
                         ? "bg-white text-black border text-sm font-medium md:text-base "
                         : "bg-[#DCE6F8] text-[#333]"
                     }`}
+                    disabled={subcategoryStatus === "loading"} // Disable saat loading
                   >
-                    {selectedCategory === category.difficulty_id
+                    {subcategoryStatus === "loading" &&
+                    selectedCategory === category.difficulty_id
+                      ? "Memproses..."
+                      : selectedCategory === category.difficulty_id
                       ? "Dipilih"
                       : "Pilih"}
                   </button>

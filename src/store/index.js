@@ -49,6 +49,7 @@ import questionsSurveyReducer from "../Features/Survey/Reducer/questionsSurvey";
 import testExamsReducer from "../Features/Survey/Reducer/testExams";
 import questionsTestReducer  from "../Features/Survey/Reducer/questionsTest";
 import userTestReducer from "../Features/Survey/Reducer/userTest";
+// import userSubcategoryReducer from "../Features/Subcategory/Reducer/subcategory";
 
 // Import thunks
 import {
@@ -84,7 +85,8 @@ export const store = configureStore({
     questionsSurvey: questionsSurveyReducer,
     testExams: testExamsReducer,
     questionsTest: questionsTestReducer,
-    userTest: userTestReducer
+    userTest: userTestReducer,
+    // userSubcategory: userSubcategoryReducer
 
   },
 });

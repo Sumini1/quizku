@@ -374,7 +374,7 @@ const EvaluationSatu = () => {
               {/* Overlay redup */}
               <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
-                className={`rounded-xl rounded-b-none w-full m-0 p-6 mt-[550px] items-center justify-center fixed bottom-0 ${
+                className={`rounded-xl rounded-b-none w-full m-0 p-6 mt-[550px] items-center justify-center fixed bottom-0  md:max-w-md ${
                   isAnswerCorrect ? "bg-[#DCFFD9]" : "bg-[#FFD9D9]"
                 }`}
               >
