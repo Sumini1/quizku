@@ -10,7 +10,7 @@ import {
 } from "react-icons/io5";
 import { MdLightbulb } from "react-icons/md";
 
-const UlasanSoal = () => {
+const UlasanQuizQuestions = () => {
   const { middleTheme, getButtonClass, getAnswerColor } = useTheme();
 
   const navigate = useNavigate();
@@ -72,6 +72,8 @@ const UlasanSoal = () => {
     const time = question.timeSpent || question.time || question.duration || 0;
     return typeof time === "number" ? time : parseInt(time) || 0;
   };
+
+  
 
   return (
     <div className="flex justify-center w-full min-h-screen">
@@ -167,4 +169,4 @@ const UlasanSoal = () => {
   );
 };
 
-export default UlasanSoal;
+export default UlasanQuizQuestions;

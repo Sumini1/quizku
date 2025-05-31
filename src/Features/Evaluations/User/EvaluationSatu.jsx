@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchEvaluationsQuestions } from "../Reducer/evaluationsQuestions";
-import { saveUserEvaluationsProgress } from "../Reducer/userEvaluations"; // Add this import
+import { saveUserEvaluationsProgress } from "../Reducer/userEvaluations";
 import { useTheme } from "../../../Context/ThemeContext";
 import { IoClose } from "react-icons/io5";
 import { FaCheckCircle, FaBook, FaHeart } from "react-icons/fa";
@@ -62,7 +61,6 @@ const EvaluationSatu = () => {
     (state) => state.evaluationsQuestions
   );
 
-  // Add selector for userEvaluations state with fallback
   const userEvaluationsState = useSelector(
     (state) => state.userEvaluations || {}
   );
@@ -78,7 +76,7 @@ const EvaluationSatu = () => {
   const [totalTimeTaken, setTotalTimeTaken] = useState(0);
   const [accumulatedScore, setAccumulatedScore] = useState(0);
   const [showSkeleton, setShowSkeleton] = useState(true);
-  const [evaluationStartTime, setEvaluationStartTime] = useState(null); // Add this for overall evaluation time
+  const [evaluationStartTime, setEvaluationStartTime] = useState(null);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalReferensiVisible, setIsModalReferensiVisible] = useState(false);
@@ -87,37 +85,7 @@ const EvaluationSatu = () => {
   const [isModalDonaturOpen, setIsModalDonaturOpen] = useState(false);
 
   const currentQuestion = questions[currentIndex];
-
-  useEffect(() => {
-    dispatch(fetchEvaluationsQuestions(id));
-
-    // Set skeleton minimum duration
-    const timer = setTimeout(() => {
-      setShowSkeleton(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [dispatch, id]);
-
-  useEffect(() => {
-    setQuestions(data || []);
-    setStartTime(Date.now());
-    setEvaluationStartTime(Date.now()); // Set overall evaluation start time
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, [data]);
-
-  useEffect(() => {
-    const savedScore = parseInt(localStorage.getItem("evaluationScore")) || 0;
-    setAccumulatedScore(savedScore);
-  }, []);
-
-  const handleSelectAnswer = (answer, index) => {
-    setSelectedAnswer(index);
-    setIsAnswerCorrect(answer === currentQuestion?.question_correct_answer);
-  };
+  const [reviewData, setReviewData] = useState([]);
 
   const handleCheckAnswer = () => {
     if (selectedAnswer === null) {
@@ -134,9 +102,56 @@ const EvaluationSatu = () => {
 
     setTotalTimeTaken((prev) => prev + timeTaken);
     setIsModalVisible(true);
+
+    // Tambahkan data ke reviewData
+    setReviewData((prev) => [
+      ...prev,
+      {
+        questionNumber: currentIndex + 1,
+        question: currentQuestion?.question_text,
+        options: currentQuestion?.question_answer_choices,
+        userAnswerIndex: selectedAnswer,
+        userAnswer: currentQuestion?.question_answer_choices[selectedAnswer],
+        correctAnswerIndex: currentQuestion?.question_answer_choices?.findIndex(
+          (option) => option === currentQuestion?.question_correct_answer
+        ),
+        correctAnswer: currentQuestion?.question_correct_answer,
+        isCorrect: isAnswerCorrect,
+        explanation: currentQuestion?.question_explanation,
+        help: currentQuestion?.question_paragraph_help,
+      },
+    ]);
   };
 
-  // In the handleNextQuestion function, replace the evaluationData object:
+  useEffect(() => {
+    dispatch(fetchEvaluationsQuestions(id));
+
+    const timer = setTimeout(() => {
+      setShowSkeleton(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    setQuestions(data || []);
+    setStartTime(Date.now());
+    setEvaluationStartTime(Date.now());
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [data]);
+
+  useEffect(() => {
+    const savedScore = parseInt(localStorage.getItem("evaluationScore")) || 0;
+    setAccumulatedScore(savedScore);
+  }, []);
+
+  const handleSelectAnswer = (answer, index) => {
+    setSelectedAnswer(index);
+    setIsAnswerCorrect(answer === currentQuestion?.question_correct_answer);
+  };
 
   const handleNextQuestion = () => {
     if (currentIndex < questions.length - 1) {
@@ -166,12 +181,12 @@ const EvaluationSatu = () => {
         return;
       }
 
-      // Prepare data for API with correct field names
+      // Prepare data for API
       const evaluationData = {
-        user_evaluation_evaluation_id: evaluationId, // Changed from user_evaluation_id
+        user_evaluation_evaluation_id: evaluationId,
         user_evaluation_unit_id: 2,
         user_evaluation_attempt: 1,
-        user_evaluation_percentage_grade: finalPercentage, // This field is already correct
+        user_evaluation_percentage_grade: finalPercentage,
         user_evaluation_time_duration: totalEvaluationTime,
         user_evaluation_point: newAccumulatedScore,
       };
@@ -202,10 +217,10 @@ const EvaluationSatu = () => {
           console.error("Error saving progress:", error);
         });
 
-      // Save to localStorage for local state
+      // Save to localStorage
       localStorage.setItem("evaluationScore", newAccumulatedScore.toString());
 
-      // Navigate to results page
+      // Navigate to results page with reviewData
       navigate("/pemula/evaluation-satu/final-scored", {
         state: {
           score,
@@ -213,6 +228,7 @@ const EvaluationSatu = () => {
           timeTaken: totalEvaluationTime,
           totalPoints: newAccumulatedScore,
           percentage: finalPercentage,
+          reviewData: reviewData, // Pass review data to results page
         },
       });
     }
@@ -242,6 +258,13 @@ const EvaluationSatu = () => {
     );
   }
 
+
+  const handleContinue = () => {
+    const themeId =
+      location.state?.themeId || localStorage.getItem("selectedThemeId") || "1";
+    navigate(`/tema-belajar/${themeId}`);
+  };
+  
   if (!currentQuestion) {
     return (
       <div className="flex flex-col w-full h-full min-h-screen">
@@ -251,10 +274,10 @@ const EvaluationSatu = () => {
           <div className="flex flex-col items-center">
             <p>Tidak ada pertanyaan tersedia</p>
             <button
-              onClick={() => navigate("/")}
+              onClick={handleContinue}
               className="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 p-5"
             >
-              Kembali ke Beranda
+              Kembali ke Pembelajaran
             </button>
           </div>
         </div>
@@ -262,6 +285,7 @@ const EvaluationSatu = () => {
     );
   }
 
+  
   return (
     <>
       <div className="flex justify-center w-full h-full min-h-screen">
@@ -475,7 +499,7 @@ const EvaluationSatu = () => {
           {/* Modal for Question Reference */}
           {isModalReferensiVisible && (
             <div
-              className="ffixed inset-0 z-50 flex justify-center items-center p-5"
+              className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalReferensiVisible(false)}
             >
               {/* Overlay redup */}

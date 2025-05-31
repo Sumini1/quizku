@@ -86,6 +86,7 @@ const QuizSatu = () => {
   const [isModalDonaturOpen, setIsModalDonaturOpen] = useState(false);
 
   const currentQuestion = questions[currentIndex];
+  const [reviewData, setReviewData] = useState([]);
 
   useEffect(() => {
     dispatch(fetchQuizQuestions(id));
@@ -133,6 +134,25 @@ const QuizSatu = () => {
 
     setTotalTimeTaken((prev) => prev + timeTaken);
     setIsModalVisible(true);
+
+    // Tambahkan data ke reviewData
+    setReviewData((prev) => [
+      ...prev,
+      {
+        questionNumber: currentIndex + 1,
+        question: currentQuestion?.question_text,
+        options: currentQuestion?.question_answer_choices,
+        userAnswerIndex: selectedAnswer,
+        userAnswer: currentQuestion?.question_answer_choices[selectedAnswer],
+        correctAnswerIndex: currentQuestion?.question_answer_choices?.findIndex(
+          (option) => option === currentQuestion?.question_correct_answer
+        ),
+        correctAnswer: currentQuestion?.question_correct_answer,
+        isCorrect: isAnswerCorrect,
+        explanation: currentQuestion?.question_explanation,
+        help: currentQuestion?.question_paragraph_help,
+      },
+    ]);
   };
 
   // In the handleNextQuestion function, replace the quizzesData object:
@@ -212,6 +232,7 @@ const QuizSatu = () => {
           timeTaken: totalQuizzesTime,
           totalPoints: newAccumulatedScore,
           percentage: finalPercentage,
+          reviewData: reviewData, // Pass review data to results page
         },
       });
     }

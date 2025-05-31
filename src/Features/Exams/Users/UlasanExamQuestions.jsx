@@ -10,7 +10,7 @@ import {
 } from "react-icons/io5";
 import { MdLightbulb } from "react-icons/md";
 
-const UlasanSoal = () => {
+const UlasanExamQuestions = () => {
   const { middleTheme, getButtonClass, getAnswerColor } = useTheme();
 
   const navigate = useNavigate();
@@ -167,4 +167,4 @@ const UlasanSoal = () => {
   );
 };
 
-export default UlasanSoal;
+export default UlasanExamQuestions;

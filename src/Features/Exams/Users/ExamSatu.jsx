@@ -7,7 +7,7 @@ import { IoClose } from "react-icons/io5";
 import { FaCheckCircle, FaBook, FaHeart } from "react-icons/fa";
 import { MdMenuBook } from "react-icons/md";
 import lamp from "../../../assets/themes_or_levels/lamp.png";
-import { saveUserExamsProgress } from '../Reducer/userExams';
+import { saveUserExamsProgress } from "../Reducer/userExams";
 
 const SkeletonLoader = () => {
   return (
@@ -57,14 +57,10 @@ const ExamSatu = () => {
   const { id } = useParams();
   const { getButtonClass, getBorderClass, middleTheme } = useTheme();
 
-  const { data, loading, error } = useSelector(
-    (state) => state.examsQuestions
-  );
+  const { data, loading, error } = useSelector((state) => state.examsQuestions);
 
   // Add selector for userExams state with fallback
-  const userExamsState = useSelector(
-    (state) => state.userExamss || {}
-  );
+  const userExamsState = useSelector((state) => state.userExamss || {});
   const { status: saveStatus = "idle", error: saveError = null } =
     userExamsState;
 
@@ -86,6 +82,7 @@ const ExamSatu = () => {
   const [isModalDonaturOpen, setIsModalDonaturOpen] = useState(false);
 
   const currentQuestion = questions[currentIndex];
+  const [reviewData, setReviewData] = useState([]);
 
   useEffect(() => {
     dispatch(fetchExamsQuestions(id));
@@ -133,6 +130,25 @@ const ExamSatu = () => {
 
     setTotalTimeTaken((prev) => prev + timeTaken);
     setIsModalVisible(true);
+
+    // Tambahkan data ke reviewData
+    setReviewData((prev) => [
+      ...prev,
+      {
+        questionNumber: currentIndex + 1,
+        question: currentQuestion?.question_text,
+        options: currentQuestion?.question_answer_choices,
+        userAnswerIndex: selectedAnswer,
+        userAnswer: currentQuestion?.question_answer_choices[selectedAnswer],
+        correctAnswerIndex: currentQuestion?.question_answer_choices?.findIndex(
+          (option) => option === currentQuestion?.question_correct_answer
+        ),
+        correctAnswer: currentQuestion?.question_correct_answer,
+        isCorrect: isAnswerCorrect,
+        explanation: currentQuestion?.question_explanation,
+        help: currentQuestion?.question_paragraph_help,
+      },
+    ]);
   };
 
   // In the handleNextQuestion function, replace the examData object:
@@ -147,9 +163,7 @@ const ExamSatu = () => {
       // Calculate final results
       const newAccumulatedScore = accumulatedScore + score;
       const finalPercentage = Math.round((score / questions.length) * 100);
-      const totalExamTime = Math.round(
-        (Date.now() - examStartTime) / 1000
-      );
+      const totalExamTime = Math.round((Date.now() - examStartTime) / 1000);
 
       // Validate required fields
       const examId = parseInt(id);
@@ -188,10 +202,7 @@ const ExamSatu = () => {
       // Save progress to API
       dispatch(saveUserExamsProgress(examData))
         .then((result) => {
-          if (
-            result.type ===
-            "userExams/saveUserExamsProgress/fulfilled"
-          ) {
+          if (result.type === "userExams/saveUserExamsProgress/fulfilled") {
             console.log("Progress saved successfully:", result.payload);
           } else {
             console.error("Failed to save progress:", result.payload);
@@ -212,6 +223,7 @@ const ExamSatu = () => {
           timeTaken: totalExamTime,
           totalPoints: newAccumulatedScore,
           percentage: finalPercentage,
+          reviewData: reviewData, // Pass review data to results page
         },
       });
     }

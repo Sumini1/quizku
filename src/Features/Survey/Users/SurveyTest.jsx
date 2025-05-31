@@ -60,11 +60,8 @@ const SurveyTest = () => {
   const { data, loading, error } = useSelector((state) => state.questionsTest);
 
   // Add selector for userEvaluations state with fallback
-  const userTest = useSelector(
-    (state) => state.userTest || {}
-  );
-  const { status: saveStatus = "idle", error: saveError = null } =
-    userTest;
+  const userTest = useSelector((state) => state.userTest || {});
+  const { status: saveStatus = "idle", error: saveError = null } = userTest;
 
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -84,6 +81,7 @@ const SurveyTest = () => {
   const [isModalDonaturOpen, setIsModalDonaturOpen] = useState(false);
 
   const currentQuestion = questions[currentIndex];
+  const [reviewData, setReviewData] = useState([]);
 
   useEffect(() => {
     dispatch(fetchQuestionsTest(id));
@@ -131,9 +129,28 @@ const SurveyTest = () => {
 
     setTotalTimeTaken((prev) => prev + timeTaken);
     setIsModalVisible(true);
+
+    // Tambahkan data ke reviewData
+    setReviewData((prev) => [
+      ...prev,
+      {
+        questionNumber: currentIndex + 1,
+        question: currentQuestion?.question_text,
+        options: currentQuestion?.question_answer_choices,
+        userAnswerIndex: selectedAnswer,
+        userAnswer: currentQuestion?.question_answer_choices[selectedAnswer],
+        correctAnswerIndex: currentQuestion?.question_answer_choices?.findIndex(
+          (option) => option === currentQuestion?.question_correct_answer
+        ),
+        correctAnswer: currentQuestion?.question_correct_answer,
+        isCorrect: isAnswerCorrect,
+        explanation: currentQuestion?.question_explanation,
+        help: currentQuestion?.question_paragraph_help,
+      },
+    ]);
   };
 
-  // In the handleNextQuestion function, replace the evaluationData object:
+  // In the handleNextQuestion function, replace the surveyData object:
 
   const handleNextQuestion = () => {
     if (currentIndex < questions.length - 1) {
@@ -145,9 +162,7 @@ const SurveyTest = () => {
       // Calculate final results
       const newAccumulatedScore = accumulatedScore + score;
       const finalPercentage = Math.round((score / questions.length) * 100);
-      const totalTestTime = Math.round(
-        (Date.now() - testStartTime) / 1000
-      );
+      const totalTestTime = Math.round((Date.now() - testStartTime) / 1000);
 
       // Validate required fields
       const testId = parseInt(id);
@@ -164,7 +179,7 @@ const SurveyTest = () => {
       }
 
       // Prepare data for API with correct field names
-      const evaluationData = {
+      const surveyData = {
         user_test_exam_test_exam_id: testId, // Changed from user_evaluation_id
         user_test_unit_id: 2,
         user_test_attempt: 1,
@@ -173,7 +188,7 @@ const SurveyTest = () => {
         user_test_exam_point: newAccumulatedScore,
       };
 
-      console.log("Evaluation Data being sent:", evaluationData);
+      console.log("Survey Data being sent:", surveyData);
       console.log(
         "Score:",
         score,
@@ -184,23 +199,18 @@ const SurveyTest = () => {
       );
 
       // Save progress to API
-      dispatch(saveUserSurveysProgress(evaluationData))
-        .then((result) => {
-          if (
-            result.type ===
-            "userEvaluations/saveUserSurveysProgress/fulfilled"
-          ) {
-            console.log("Progress saved successfully:", result.payload);
-          } else {
-            console.error("Failed to save progress:", result.payload);
-          }
+      dispatch(saveUserSurveysProgress(surveyData))
+        .unwrap()
+        .then((data) => {
+          console.log("✅ Progress saved successfully:", data);
         })
         .catch((error) => {
-          console.error("Error saving progress:", error);
+          console.error("❌ Failed to save progress:", error);
         });
 
+
       // Save to localStorage for local state
-      localStorage.setItem("evaluationScore", newAccumulatedScore.toString());
+      localStorage.setItem("testScore", newAccumulatedScore.toString());
 
       // Navigate to results page
       navigate("/pemula/test-exams/final-scored", {
@@ -210,6 +220,7 @@ const SurveyTest = () => {
           timeTaken: totalTestTime,
           totalPoints: newAccumulatedScore,
           percentage: finalPercentage,
+          reviewData: reviewData, // Pass review data to results page
         },
       });
     }

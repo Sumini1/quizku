@@ -5,6 +5,7 @@ import SurveyTiga from "./Users/SurveyTiga";
 import SurveyTestLevels from "./Users/SurveyTestLevels";
 import SurveyTest from "./Users/SurveyTest";
 import FinalScoredTestExams from "./Users/FinalScoredTestExams";
+  import UlasanSurveyQuestions from "./Users/UlasanSurveyQuestions";
 
 export const surveyRoutes = [
   {
@@ -30,5 +31,9 @@ export const surveyRoutes = [
   {
     path: "/pemula/test-exams/final-scored",
     element: <FinalScoredTestExams />,
+  },
+  {
+    path: "/ulasan-survey-questions",
+    element: <UlasanSurveyQuestions />,
   },
 ];
