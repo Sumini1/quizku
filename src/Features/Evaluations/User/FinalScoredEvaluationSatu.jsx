@@ -33,9 +33,29 @@ const FinalScoredEvaluationSatu = () => {
   const [celebrationMessage, setCelebrationMessage] = useState("");
   const [showConfetti, setShowConfetti] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [targetType, setTargetType] = useState("pemula");
+  const [userModuleAttemptTargetType, setUserModuleAttemptTargetType] =
+    useState(null);
+
+  // ✅ TAMBAHAN: State untuk modal konfirmasi
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   // Get review data from location state
   const reviewData = location.state?.reviewData || [];
+  const [evaluationId, setEvaluationId] = useState(null);
+  const [canGoBack, setCanGoBack] = useState(false);
+  useEffect(() => {
+    if (isConfirmModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isConfirmModalOpen]);
+
 
   useEffect(() => {
     // Check if state was passed from the quiz page
@@ -46,6 +66,11 @@ const FinalScoredEvaluationSatu = () => {
         timeTaken,
         totalPoints = 0,
         percentage = 0,
+        targetType = "pemula",
+        sourceType,
+        evaluationId,
+        canGoBack = false,
+        userModuleAttemptTargetType,
       } = location.state;
 
       setScore(score);
@@ -53,49 +78,143 @@ const FinalScoredEvaluationSatu = () => {
       setTotalTime(timeTaken);
       setTotalPoints(totalPoints);
       setPercentage(percentage);
+      setTargetType(targetType || sourceType || "pemula");
+      setEvaluationId(evaluationId);
+      setCanGoBack(canGoBack);
+      setUserModuleAttemptTargetType(userModuleAttemptTargetType);
 
-      // Set celebration message based on score
+      // Set celebration message based on score and target type
       const calculatedPercentage = (score / totalQuestions) * 100;
-      if (calculatedPercentage >= 80) {
-        setCelebrationMessage(
-          "🎉 Luar biasa! Anda telah menguasai materi dengan sangat baik! 🎉"
-        );
-      } else if (calculatedPercentage >= 60) {
-        setCelebrationMessage(
-          "👏 Bagus! Anda telah menyelesaikan tes dengan baik! 👏"
-        );
-      } else {
-        setCelebrationMessage(
-          "💪 Terus semangat! Anda telah menyelesaikan tes! 💪"
-        );
-      }
+      setCelebrationMessage(
+        getCelebrationMessage(calculatedPercentage, targetType)
+      );
 
       setTimeout(() => setShowConfetti(false), 6000);
     } else {
-      // Redirect if no quiz result data
-      navigate("/beranda");
+      const backupState = localStorage.getItem("evaluation_backup_state");
+      if (backupState) {
+        try {
+          const parsed = JSON.parse(backupState);
+          if (Date.now() - parsed.timestamp < 3600000) {
+            setEvaluationId(parsed.evaluationId);
+            setCanGoBack(true);
+            setUserModuleAttemptTargetType(parsed.userModuleAttemptTargetType);
+            localStorage.removeItem("evaluation_backup_state");
+          }
+        } catch (error) {
+          // console.error("Error parsing backup state:", error);
+        }
+      }
+
+      if (!backupState) {
+        navigate("/beranda");
+      }
     }
   }, [location.state, navigate]);
 
-  const formatTime = (time) => {
-    if (time < 60) {
-      return `${time}s`;
+  const getCelebrationMessage = (perc, type) => {
+    const messages = {
+      pemula: {
+        excellent: "🎉 Luar biasa! Anda telah menguasai materi pemula!",
+        good: "👏 Bagus! Anda siap ke level berikutnya!",
+        fair: "💪 Terus semangat! Anda sudah menyelesaikan level pemula!",
+      },
+      menengah: {
+        excellent: "🎉 Hebat! Materi menengah dikuasai sempurna!",
+        good: "👏 Keren! Siap lanjut ke tingkat berikutnya!",
+        fair: "💪 Semangat! Terus tingkatkan di level menengah!",
+      },
+      lanjutan: {
+        excellent: "🎉 Mantap! Anda master di level lanjutan!",
+        good: "👏 Luar biasa! Materi lanjutan hampir dikuasai!",
+        fair: "💪 Semangat! Tingkatkan kemampuan tingkat akhir!",
+      },
+    };
+    const msg = messages[type] || messages.pemula;
+    if (perc >= 80) return msg.excellent;
+    if (perc >= 60) return msg.good;
+    return msg.fair;
+  };
+
+  const calculatePercentage = () =>
+    Number((score / totalQuestions) * 100).toFixed(0);
+
+  const isEligibleToContinue = () => {
+    const currentPercentage = Number(calculatePercentage());
+
+    if (userModuleAttemptTargetType === 4) {
+      // console.log("🎯 Target type 4 (exam) - always eligible to continue");
+      return true;
+    }
+
+    const isEligible = currentPercentage >= 65;
+    return isEligible;
+  };
+
+  const formatTime = (t) =>
+    t < 60 ? `${t}s` : `${Math.floor(t / 60)}m ${t % 60}s`;
+
+  const getReturnPath = () => {
+    const themeId =
+      location.state?.themeId || localStorage.getItem("selectedThemeId") || "1";
+    if (targetType === "menengah") return `/tema-menengah/${themeId}`;
+    if (targetType === "lanjutan") return `/tema-lanjutan/${themeId}`;
+    return `/tema-belajar/${themeId}`;
+  };
+
+  const handleContinue = () => navigate(getReturnPath());
+
+  const handleNavigateToReview = () =>
+    navigate("/ulasan-soal", {
+      state: {
+        reviewData,
+        score,
+        totalQuestions,
+        percentage: calculatePercentage(),
+        targetType,
+        themeId: location.state?.themeId,
+        returnPath: getReturnPath(),
+      },
+    });
+
+  const handleGoBackToEvaluation = () => {
+    if (evaluationId && canGoBack) {
+      navigate(`/pemula/evaluation-satu/${evaluationId}`, {
+        state: {
+          themeId: location.state?.themeId,
+          returnFromResults: true,
+        },
+      });
     } else {
-      const minutes = Math.floor(time / 60);
-      const seconds = time % 60;
-      if (seconds === 0) {
-        return `${minutes}m`;
-      } else {
-        return `${minutes}m ${seconds}s`;
-      }
+      navigate(-1);
     }
   };
 
-  const calculatePercentage = () => {
-    return percentage || ((score / totalQuestions) * 100).toFixed(0);
+  // ✅ MODIFIKASI: Handle close dengan modal kustom
+  const handleClose = () => {
+    if (canGoBack && evaluationId) {
+      setIsConfirmModalOpen(true); // Buka modal konfirmasi
+    } else {
+      navigate("/beranda");
+    }
   };
 
-  const getGradeStatus = () => {
+  // ✅ TAMBAHAN: Handler untuk modal konfirmasi
+  const handleConfirmGoBack = () => {
+    setIsConfirmModalOpen(false);
+    handleGoBackToEvaluation();
+  };
+
+  const handleConfirmStay = () => {
+    setIsConfirmModalOpen(false);
+    navigate("/beranda");
+  };
+
+  const handleCancelModal = () => {
+    setIsConfirmModalOpen(false);
+  };
+
+  const gradeInfo = (() => {
     const perc = calculatePercentage();
     if (perc >= 80)
       return {
@@ -124,78 +243,36 @@ const FinalScoredEvaluationSatu = () => {
       bgColor: "bg-red-100",
       strokeColor: "#ef4444",
     };
-  };
+  })();
 
   const items = [
     {
       id: 1,
       title: "Skor",
-      icon: <MdFactCheck className="text-lg" />,
+      icon: <MdFactCheck />,
       value: `${score}/${totalQuestions}`,
     },
     {
       id: 2,
       title: "Persentase",
-      icon: <HiBadgeCheck className="text-lg" />,
+      icon: <HiBadgeCheck />,
       value: `${calculatePercentage()}%`,
     },
     {
       id: 3,
       title: "Waktu",
-      icon: <FaHourglassEnd className="text-lg" />,
+      icon: <FaHourglassEnd />,
       value: formatTime(totalTime),
     },
-    {
-      id: 4,
-      title: "Poin",
-      icon: <RiCoinFill className="text-lg" />,
-      value: totalPoints,
-    },
+    { id: 4, title: "Poin", icon: <RiCoinFill />, value: totalPoints },
   ];
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    const themeId =
-      location.state?.themeId ||
-      localStorage.getItem("selectedThemeId") ||
-      getThemeIdBasedOnScore() ||
-      "1";
-    navigate(`/tema-belajar/${themeId}`);
+  const getButtonText = () => {
+    if (userModuleAttemptTargetType === 4) {
+      return "Lanjutkan Belajar";
+    }
+    return isEligibleToContinue() ? "Lanjutkan Belajar" : "Ulangi Dulu";
   };
-
-  const getThemeIdBasedOnScore = () => {
-    const perc = calculatePercentage();
-    if (perc >= 80) return "advanced";
-    if (perc >= 60) return "intermediate";
-    return "basic";
-  };
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleNavigateToReview = () => {
-    navigate("/ulasan-soal", {
-      state: {
-        reviewData: reviewData,
-        score: score,
-        totalQuestions: totalQuestions,
-        percentage: calculatePercentage(),
-      },
-    });
-  };
-
-  const handleRetakeQuiz = () => {
-    navigate(-1); // Go back to quiz start
-  };
-
-  const handleContinue = () => {
-    const themeId =
-      location.state?.themeId || localStorage.getItem("selectedThemeId") || "1";
-    navigate(`/tema-belajar/${themeId}`);
-  };
-
-  const gradeInfo = getGradeStatus();
 
   return (
     <>
@@ -210,25 +287,28 @@ const FinalScoredEvaluationSatu = () => {
 
       <div className="flex justify-center w-full min-h-screen">
         <div className={`flex flex-col max-w-md w-full ${middleTheme()}`}>
-          {/* Header Section - Compact */}
-          <div className="text-center px-4 py-3">
+         
+
+          {/* Badge & Message */}
+          <div className="text-center px-5">
             <div
-              className={`inline-flex items-center px-3 py-1 mt-5 rounded-full ${gradeInfo.bgColor} ${gradeInfo.color} mb-2`}
+              className={`inline-flex items-center px-4 py-2 rounded-full ${gradeInfo.bgColor} ${gradeInfo.color} mb-3`}
             >
-              <HiBadgeCheck className="text-lg mr-1" />
-              <span className="font-semibold text-xl ">{gradeInfo.status}</span>
+              <HiBadgeCheck className="text-lg mr-2" />
+              <span className="font-semibold text-lg">{gradeInfo.status}</span>
             </div>
-            <p className="text-sm font-medium">{celebrationMessage}</p>
+            <p className="text-sm font-medium mb-4">{celebrationMessage}</p>
+
+            
           </div>
 
-          {/* Score Circle - Smaller and Centered */}
-          <div className="flex justify-center ">
+          {/* Circle Progress */}
+          <div className="flex justify-center mb-6">
             <div className="relative w-32 h-32">
               <svg
                 className="w-full h-full transform -rotate-90"
                 viewBox="0 0 100 100"
               >
-                {/* Background circle */}
                 <circle
                   cx="50"
                   cy="50"
@@ -237,7 +317,6 @@ const FinalScoredEvaluationSatu = () => {
                   strokeWidth="6"
                   fill="none"
                 />
-                {/* Progress circle */}
                 <circle
                   cx="50"
                   cy="50"
@@ -251,26 +330,21 @@ const FinalScoredEvaluationSatu = () => {
                   className="transition-all duration-1000 ease-out"
                 />
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">
-                    {calculatePercentage()}%
-                  </div>
-                  <div className="text-xs text-gray-500">Score</div>
-                </div>
+              <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold">
+                {calculatePercentage()}%
               </div>
             </div>
           </div>
 
-          {/* Results Grid - More Compact */}
-          <div className="grid grid-cols-2 gap-3 px-4">
+          {/* Result Items */}
+          <div className="grid grid-cols-2 gap-4 px-5 mb-6">
             {items.map((item) => (
               <div
                 key={item.id}
-                className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm text-center"
+                className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm text-center"
               >
                 <div className="flex justify-center mb-2">
-                  <div className={`p-1 rounded-md ${getBorderColor()}`}>
+                  <div className={`p-2 rounded-lg ${getBorderColor()}`}>
                     {item.icon}
                   </div>
                 </div>
@@ -280,101 +354,87 @@ const FinalScoredEvaluationSatu = () => {
             ))}
           </div>
 
-          {/* Action buttons - Fixed at bottom without scroll */}
-          <div className="mt-auto p-4 space-y-2">
-            {/* Review answers button */}
+          {/* Action Buttons */}
+          <div className="mt-auto p-5 space-y-3">
             {reviewData.length > 0 && (
               <button
                 onClick={handleNavigateToReview}
-                className="w-full p-2 rounded-lg border border-gray-200 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                className="w-full p-3 rounded-xl border border-gray-200 flex items-center justify-between hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center">
-                  <MdOutlineError className="text-lg mr-2" />
-                  <span className="font-medium text-sm">Lihat Pembahasan</span>
+                  <MdOutlineError className="text-lg mr-3" />
+                  <span className="font-medium">Lihat Pembahasan</span>
                 </div>
                 <FaArrowRight className="text-sm" />
               </button>
             )}
 
-            {/* Bottom action buttons with space-between */}
-            <div className="flex justify-between items-center space-x-2">
-              {/* Retake quiz button - now as icon */}
+            <div className="flex justify-between items-center gap-3">
               <button
-                onClick={handleRetakeQuiz}
-                className={`w-12 h-12 border ${getBorderClass()} rounded-lg hover:opacity-80 transition-opacity flex items-center justify-center`}
+                onClick={handleClose}
+                className={`w-12 h-12 border ${getBorderClass()} rounded-xl hover:opacity-80 transition-opacity flex items-center justify-center`}
               >
-                <TbArrowBackUp className="text-lg" />
+                <TbArrowBackUp className="text-xl" />
               </button>
 
-              {/* Continue button */}
               <button
                 onClick={handleContinue}
-                className={`flex-1 p-3 border-none rounded-lg ${getButtonClass()} text-white font-medium hover:opacity-90 transition-opacity`}
+                disabled={!isEligibleToContinue()}
+                className={`flex-1 p-3 rounded-xl ${
+                  isEligibleToContinue()
+                    ? getButtonClass()
+                    : "bg-gray-300 cursor-not-allowed"
+                } text-white font-medium transition-opacity ${
+                  !isEligibleToContinue() ? "opacity-50" : ""
+                }`}
               >
-                Lanjutkan Belajar
+                {getButtonText()}
               </button>
             </div>
           </div>
-
-          {/* Modal for additional options */}
-          {isModalOpen && (
-            <div className="fixed inset-0 z-50 flex justify-center items-center p-4">
-              <div
-                className="absolute inset-0 bg-black opacity-50"
-                onClick={handleCloseModal}
-              ></div>
-              <div className="bg-white rounded-xl w-full max-w-sm relative p-4">
-                <div className="flex justify-between items-center mb-3">
-                  <h2 className="text-lg font-bold">Pilihan Lanjutan</h2>
-                  <IoClose
-                    className="text-xl cursor-pointer"
-                    onClick={handleCloseModal}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <button
-                    onClick={handleNavigateToReview}
-                    className="w-full p-2 text-left border border-gray-200 rounded-lg hover:bg-gray-50"
-                  >
-                    <span className="text-sm">📝 Lihat Pembahasan Lengkap</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigate("/beranda")}
-                    className="w-full p-2 text-left border border-gray-200 rounded-lg hover:bg-gray-50 mb-2"
-                  >
-                    <span className="text-sm">🏠 Kembali ke Beranda</span>
-                  </button>
-
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={handleRetakeQuiz}
-                      className="w-12 h-12 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center"
-                    >
-                      <TbArrowBackUp className="text-2xg text-green-600 font-bold" />
-                    </button>
-
-                    <button
-                      onClick={handleContinue}
-                      className="flex-1 p-3 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors"
-                    >
-                      Lanjutkan
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleContinue}
-                  className={`w-full p-2 rounded-lg mt-3 ${getButtonClass()} text-white font-medium text-sm`}
-                >
-                  Lanjutkan Pembelajaran
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* ✅ TAMBAHAN: Modal Konfirmasi Kustom */}
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 z-50 flex justify-center items-center p-3">
+          <div className="absolute inset-0 bg-black opacity-50 z-40"></div>
+          <div className="bg-white rounded-xl p-5 max-w-sm w-full mx-4 shadow-xl z-50 relative">
+            <div className="text-center mb-3 ">
+              <div className="w-10 h-10  rounded-full flex items-center justify-center mx-auto mb-3">
+                <TbArrowBackUp className="text-2xl text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Kembali ke Soal?
+              </h3>
+              <p className="text-base text-gray-600">
+                Apakah Anda yakin ingin kembali ke halaman soal ?
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelModal}
+                className="flex-1 px-4 py-1 text-sm border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleConfirmStay}
+                className="flex-1 px-4 py-1 text-sm bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
+              >
+                Ke Beranda
+              </button>
+              <button
+                onClick={handleConfirmGoBack}
+                className={`flex-1 px-4 py-1 text-sm rounded-lg text-white font-medium transition-colors border-none ${getButtonClass()}`}
+              >
+                Ya, Kembali
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

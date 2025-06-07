@@ -108,6 +108,7 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // ⬅️ Tambahkan ini
 });
 
 // Fungsi untuk menambahkan konfigurasi interceptor

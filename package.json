@@ -15,6 +15,7 @@
     "@tinymce/tinymce-react": "^6.1.0",
     "axios": "^1.9.0",
     "js-cookie": "^3.0.5",
+    "lucide-react": "^0.511.0",
     "react": "^19.0.0",
     "react-confetti": "^6.4.0",
     "react-dom": "^19.0.0",

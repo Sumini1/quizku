@@ -2,14 +2,17 @@ import React from "react";
 import { FiUser } from "react-icons/fi";
 import { useTheme } from "../../../Context/ThemeContext";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "../../../pages/QuestionStatic/Reducer/modalSlice";
+import { saveUserCreate } from "../../../pages/ButtonMobile/BerandaPage/SettingsPage/Reducer/userProfil";
 
 
 const DataDiriLanjutan = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { getBorder, getButtonClass, middleTheme } = useTheme();
+  const {data, loading, error} = useSelector((state) => state.userProfile);
+
 
   const handleClick = (destination) => {
     dispatch(openModal()); // Aktifkan modal di Redux state

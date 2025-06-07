@@ -1,69 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { fetchExamsQuestions } from "../Reducer/examsQuestions";
+import { submitBatch } from "../../Evaluations/Reducer/submitBatch";
 import { useTheme } from "../../../Context/ThemeContext";
 import { IoClose } from "react-icons/io5";
 import { FaCheckCircle, FaBook, FaHeart } from "react-icons/fa";
 import { MdMenuBook } from "react-icons/md";
 import lamp from "../../../assets/themes_or_levels/lamp.png";
-import { saveUserExamsProgress } from "../Reducer/userExams";
-
-const SkeletonLoader = () => {
-  return (
-    <div className="flex flex-col p-5 min-h-screen overflow-hidden md:justify-start md:items-start md:ml-10 md:py-10">
-      {/* Progress Bar Skeleton */}
-      <div className="flex flex-col h-4 mb-2 mt-2 w-full">
-        <div className="flex w-full h-2">
-          <div className="w-5 h-5 bg-gray-200 rounded-full animate-pulse"></div>
-          <div className="w-full bg-gray-200 rounded-sm max-w-[265px] mx-1 -mt-1 animate-pulse"></div>
-        </div>
-      </div>
-
-      {/* Navigation buttons skeleton */}
-      <div className="flex items-center justify-between mt-5">
-        <div className="flex gap-2 items-center bg-gray-200 p-2 w-24 h-10 rounded-xl animate-pulse"></div>
-        <div className="flex gap-2 items-center bg-gray-200 p-2 w-24 h-10 rounded-xl animate-pulse"></div>
-      </div>
-
-      {/* Question Text Skeleton */}
-      <div className="flex flex-col mt-7">
-        <div className="h-6 bg-gray-200 rounded w-3/4 mb-2 animate-pulse"></div>
-        <div className="h-6 bg-gray-200 rounded w-1/2 animate-pulse"></div>
-      </div>
-
-      {/* Answer options skeleton */}
-      <div className="mt-10 w-full gap-5 grid grid-cols-2">
-        {[1, 2, 3, 4].map((item) => (
-          <div
-            key={item}
-            className="h-12 bg-gray-200 rounded-xl animate-pulse"
-          ></div>
-        ))}
-      </div>
-
-      {/* Bottom Action Bar Skeleton */}
-      <div className="fixed bottom-0 left-0 right-0 px-5 py-3 shadow-md flex justify-between gap-2 ">
-        <div className="w-10 h-10 bg-gray-200 rounded animate-pulse"></div>
-        <div className="p-3 w-[370px] h-12 rounded-xl bg-gray-200 animate-pulse"></div>
-      </div>
-    </div>
-  );
-};
+import SkeletonLoader from "../../Evaluations/User/SkeletonLoader";
 
 const ExamSatu = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const { getButtonClass, getBorderClass, middleTheme } = useTheme();
 
-  const { data, loading, error } = useSelector((state) => state.examsQuestions);
+  // Redux states
+  const { data, loading, error } = useSelector(
+    (state) => state.examsQuestions
+  );
+  const submitBatchState = useSelector((state) => state.submitBatch || {});
+  const { loading: saveLoading = false, error: saveError = null } =
+    submitBatchState;
 
-  // Add selector for userExams state with fallback
-  const userExamsState = useSelector((state) => state.userExamss || {});
-  const { status: saveStatus = "idle", error: saveError = null } =
-    userExamsState;
-
+  // Component states
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -73,21 +35,31 @@ const ExamSatu = () => {
   const [totalTimeTaken, setTotalTimeTaken] = useState(0);
   const [accumulatedScore, setAccumulatedScore] = useState(0);
   const [showSkeleton, setShowSkeleton] = useState(true);
-  const [examStartTime, setEvaluationStartTime] = useState(null); // Add this for overall evaluation time
+  const [evaluationStartTime, setEvaluationStartTime] = useState(null);
+  const [allAnswers, setAllAnswers] = useState([]);
+  const [attemptNumber, setAttemptNumber] = useState(1);
+  const [reviewData, setReviewData] = useState([]);
 
+  // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalReferensiVisible, setIsModalReferensiVisible] = useState(false);
   const [isModalAnswerVisible, setIsModalAnswerVisible] = useState(false);
   const [isModalMateriOpen, setIsModalMateriOpen] = useState(false);
   const [isModalDonaturOpen, setIsModalDonaturOpen] = useState(false);
+  const [showResendModal, setShowResendModal] = useState(false);
 
-  const currentQuestion = questions[currentIndex];
-  const [reviewData, setReviewData] = useState([]);
+  // Memoized values
+  const currentQuestion = useMemo(
+    () => questions[currentIndex],
+    [questions, currentIndex]
+  );
 
+  // Initialize component data
   useEffect(() => {
-    dispatch(fetchExamsQuestions(id));
+    if (id) {
+      dispatch(fetchExamsQuestions(id));
+    }
 
-    // Set skeleton minimum duration
     const timer = setTimeout(() => {
       setShowSkeleton(false);
     }, 1500);
@@ -95,29 +67,52 @@ const ExamSatu = () => {
     return () => clearTimeout(timer);
   }, [dispatch, id]);
 
+  // Handle questions data
   useEffect(() => {
-    setQuestions(data || []);
-    setStartTime(Date.now());
-    setEvaluationStartTime(Date.now()); // Set overall evaluation start time
-    document.body.style.overflow = "hidden";
+    if (data && Array.isArray(data)) {
+      setQuestions(data);
+      setStartTime(Date.now());
+      setEvaluationStartTime(Date.now());
+      document.body.style.overflow = "hidden";
+    }
+
     return () => {
       document.body.style.overflow = "auto";
     };
   }, [data]);
 
+  // Load saved progress
   useEffect(() => {
-    const savedScore = parseInt(localStorage.getItem("examsScore")) || 0;
-    setAccumulatedScore(savedScore);
-  }, []);
+    if (id) {
+      cleanupOldBackups();
+      const savedScore = parseInt(localStorage.getItem("evaluationScore")) || 0;
+      setAccumulatedScore(savedScore);
 
+      const savedAttempt =
+        parseInt(localStorage.getItem(`evaluation_${id}_attempt`)) || 1;
+      setAttemptNumber(savedAttempt);
+    }
+  }, [id]);
+
+  // function untuk menangani pemilihan jawaban
   const handleSelectAnswer = (answer, index) => {
     setSelectedAnswer(index);
     setIsAnswerCorrect(answer === currentQuestion?.question_correct_answer);
   };
 
+  // Helper function untuk convert answer index ke letter (A, B, C, D)
+  const getAnswerLetter = (index) => {
+    return String.fromCharCode(65 + index); // A=65, B=66, C=67, D=68
+  };
+
   const handleCheckAnswer = () => {
     if (selectedAnswer === null) {
       alert("Silakan pilih jawaban terlebih dahulu.");
+      return;
+    }
+
+    if (!startTime) {
+      console.error("Start time not set");
       return;
     }
 
@@ -131,102 +126,445 @@ const ExamSatu = () => {
     setTotalTimeTaken((prev) => prev + timeTaken);
     setIsModalVisible(true);
 
-    // Tambahkan data ke reviewData
-    setReviewData((prev) => [
-      ...prev,
-      {
-        questionNumber: currentIndex + 1,
-        question: currentQuestion?.question_text,
-        options: currentQuestion?.question_answer_choices,
-        userAnswerIndex: selectedAnswer,
-        userAnswer: currentQuestion?.question_answer_choices[selectedAnswer],
-        correctAnswerIndex: currentQuestion?.question_answer_choices?.findIndex(
-          (option) => option === currentQuestion?.question_correct_answer
-        ),
-        correctAnswer: currentQuestion?.question_correct_answer,
-        isCorrect: isAnswerCorrect,
-        explanation: currentQuestion?.question_explanation,
-        help: currentQuestion?.question_paragraph_help,
-      },
-    ]);
+    // ✅ Format jawaban sesuai database requirement (VARCHAR(1))
+    const answerData = {
+      user_answer_attempt_question_id:
+        currentQuestion?.id || currentQuestion?.question_id,
+      user_answer_attempt_answer: getAnswerLetter(selectedAnswer), // ✅ Convert to A/B/C/D
+      user_answer_attempt_is_correct: isAnswerCorrect,
+      user_answer_attempt_created_at: new Date().toISOString(),
+      user_answer_attempt_question_attempt: attemptNumber,
+    };
+
+    console.log("📝 Answer data:", answerData);
+    setAllAnswers((prev) => [...prev, answerData]);
+
+    // ✅ PERBAIKAN: Review data untuk UI dengan format yang sesuai UlasanSoal
+    const correctAnswerIndex =
+      currentQuestion?.question_answer_choices?.findIndex(
+        (option) => option === currentQuestion?.question_correct_answer
+      );
+
+    // ✅ Pastikan ada fallback jika correctAnswerIndex tidak ditemukan
+    const safeCorrectAnswerIndex =
+      correctAnswerIndex >= 0 ? correctAnswerIndex : 0;
+
+    // ✅ Format review data sesuai struktur yang dibutuhkan UlasanSoal
+    const reviewItem = {
+      // Required fields for UlasanSoal
+      question: currentQuestion?.question_text || "Pertanyaan tidak tersedia",
+      options: currentQuestion?.question_answer_choices || [
+        "Tidak ada pilihan",
+      ],
+      correctAnswer: safeCorrectAnswerIndex, // index jawaban benar (number)
+      userAnswer: selectedAnswer, // index jawaban user (number)
+      isCorrect: isAnswerCorrect, // boolean
+
+      // Optional fields
+      explanation:
+        currentQuestion?.question_explanation ||
+        currentQuestion?.explanation ||
+        "Penjelasan tidak tersedia",
+      category:
+        currentQuestion?.question_category ||
+        currentQuestion?.category ||
+        currentQuestion?.subject ||
+        null,
+      timeSpent: timeTaken, // waktu dalam detik
+
+      // Additional metadata (optional)
+      questionId: currentQuestion?.id || currentQuestion?.question_id,
+      questionNumber: currentIndex + 1,
+      difficulty: currentQuestion?.difficulty || null,
+
+      // Legacy fields (untuk backward compatibility jika diperlukan)
+      userAnswerText:
+        currentQuestion?.question_answer_choices?.[selectedAnswer] || "",
+      correctAnswerText: currentQuestion?.question_correct_answer || "",
+    };
+
+    console.log("📋 Review item created:", reviewItem);
+
+    setReviewData((prev) => [...prev, reviewItem]);
   };
 
-  // In the handleNextQuestion function, replace the examData object:
+  // ✅ Helper function untuk validasi review data sebelum navigasi
+  const validateReviewData = (reviewData) => {
+    return reviewData.every(
+      (item) =>
+        item.question &&
+        Array.isArray(item.options) &&
+        item.options.length > 0 &&
+        typeof item.correctAnswer === "number" &&
+        typeof item.userAnswer === "number" &&
+        typeof item.isCorrect === "boolean"
+    );
+  };
+
+  // ✅ Updated handleNavigateToReview dengan validasi
+  const handleNavigateToReview = () => {
+    console.log("📊 Review data before navigation:", reviewData);
+
+    // Validasi data sebelum navigasi
+    if (!reviewData || reviewData.length === 0) {
+      console.warn("No review data available");
+      alert("Data ulasan tidak tersedia");
+      return;
+    }
+
+    if (!validateReviewData(reviewData)) {
+      console.error("Invalid review data structure:", reviewData);
+      alert("Data ulasan tidak valid");
+      return;
+    }
+
+    navigate("/ulasan-soal", {
+      state: {
+        reviewData: reviewData,
+        score: score,
+        totalQuestions: totalQuestions,
+        percentage: calculatePercentage(),
+        themeId:
+          location.state?.themeId || localStorage.getItem("selectedThemeId"),
+        totalTime: totalTimeTaken, // tambahan info waktu total
+      },
+    });
+  };
+
+  // ✅ Alternative: Jika struktur currentQuestion berbeda, gunakan ini
+  const handleCheckAnswerAlternative = () => {
+    if (selectedAnswer === null) {
+      alert("Silakan pilih jawaban terlebih dahulu.");
+      return;
+    }
+
+    if (!startTime) {
+      console.error("Start time not set");
+      return;
+    }
+
+    const endTime = Date.now();
+    const timeTaken = Math.round((endTime - startTime) / 1000);
+
+    if (isAnswerCorrect) {
+      setScore((prev) => prev + 1);
+    }
+
+    setTotalTimeTaken((prev) => prev + timeTaken);
+    setIsModalVisible(true);
+
+    // Database answer data (unchanged)
+    const answerData = {
+      user_answer_attempt_question_id:
+        currentQuestion?.id || currentQuestion?.question_id,
+      user_answer_attempt_answer: getAnswerLetter(selectedAnswer),
+      user_answer_attempt_is_correct: isAnswerCorrect,
+      user_answer_attempt_created_at: new Date().toISOString(),
+      user_answer_attempt_question_attempt: attemptNumber,
+    };
+
+    console.log("📝 Answer data:", answerData);
+    setAllAnswers((prev) => [...prev, answerData]);
+
+    // ✅ ALTERNATIVE: Jika struktur data berbeda, manual mapping
+    let correctAnswerIndex = 0;
+    let questionOptions = [];
+
+    // Coba berbagai format struktur data
+    if (currentQuestion?.question_answer_choices) {
+      questionOptions = currentQuestion.question_answer_choices;
+      correctAnswerIndex = questionOptions.findIndex(
+        (option) => option === currentQuestion?.question_correct_answer
+      );
+    } else if (currentQuestion?.options) {
+      questionOptions = currentQuestion.options;
+      correctAnswerIndex = currentQuestion?.correctAnswer || 0;
+    } else if (currentQuestion?.choices) {
+      questionOptions = currentQuestion.choices;
+      correctAnswerIndex = currentQuestion?.correct || 0;
+    }
+
+    // Fallback jika tidak ditemukan
+    if (correctAnswerIndex < 0) correctAnswerIndex = 0;
+    if (questionOptions.length === 0)
+      questionOptions = ["Pilihan tidak tersedia"];
+
+    const reviewItem = {
+      question:
+        currentQuestion?.question_text ||
+        currentQuestion?.text ||
+        currentQuestion?.question ||
+        "Pertanyaan tidak tersedia",
+      options: questionOptions,
+      correctAnswer: correctAnswerIndex,
+      userAnswer: selectedAnswer,
+      isCorrect: isAnswerCorrect,
+      explanation:
+        currentQuestion?.question_explanation ||
+        currentQuestion?.explanation ||
+        "Penjelasan tidak tersedia",
+      category:
+        currentQuestion?.question_category || currentQuestion?.category || null,
+      timeSpent: timeTaken,
+      questionNumber: currentIndex + 1,
+    };
+
+    console.log("📋 Review item (alternative):", reviewItem);
+    setReviewData((prev) => [...prev, reviewItem]);
+  };
 
   const handleNextQuestion = () => {
     if (currentIndex < questions.length - 1) {
+      // Move to next question
       setCurrentIndex((prev) => prev + 1);
       setSelectedAnswer(null);
       setIsModalVisible(false);
       setStartTime(Date.now());
     } else {
-      // Calculate final results
-      const newAccumulatedScore = accumulatedScore + score;
-      const finalPercentage = Math.round((score / questions.length) * 100);
-      const totalExamTime = Math.round((Date.now() - examStartTime) / 1000);
+      // Finish evaluation
+      finishEvaluation();
+    }
+  };
 
-      // Validate required fields
-      const examId = parseInt(id);
-      if (!examId || isNaN(examId)) {
-        console.error("Invalid exam ID:", id);
-        alert("Error: Invalid exam ID");
-        return;
-      }
+  const cleanupOldBackups = () => {
+    try {
+      const keys = Object.keys(localStorage);
+      const backupKeys = keys.filter((key) =>
+        key.startsWith("evaluation_backup_")
+      );
+      const now = Date.now();
+      const oneWeek = 7 * 24 * 60 * 60 * 1000; // 1 minggu
 
-      if (questions.length === 0) {
-        console.error("No questions available for percentage calculation");
-        alert("Error: No questions found");
-        return;
-      }
+      backupKeys.forEach((key) => {
+        try {
+          const data = JSON.parse(localStorage.getItem(key));
+          if (data && data.timestamp && now - data.timestamp > oneWeek) {
+            localStorage.removeItem(key);
+            console.log(`🗑️ Hapus backup lama: ${key}`);
+          }
+        } catch (e) {
+          // Hapus data yang corrupt
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (error) {
+      console.error("Error cleaning backups:", error);
+    }
+  };
 
-      // Prepare data for API with correct field names
-      const examData = {
-        user_exam_exam_id: examId, // Changed from user_evaluation_id
-        user_exam_unit_id: 2,
-        user_exam_attempt: 1,
-        user_exam_percentage_grade: finalPercentage, // This field is already correct
-        user_exam_time_duration: totalExamTime,
-        user_exam_point: newAccumulatedScore,
-      };
+  const queueSubmissionForLater = (
+    batchPayload,
+    finalScore,
+    finalPercentage,
+    duration,
+    evaluationId
+  ) => {
+    const batchId = `eval_${evaluationId}_${Date.now()}`;
+    const backupKey = `evaluation_delayed_submit_${batchId}`;
 
-      console.log("Evaluation Data being sent:", examData);
+    const data = {
+      batchId,
+      payload: batchPayload,
+      finalScore,
+      finalPercentage,
+      duration,
+      timestamp: Date.now(),
+      synced: false,
+    };
+
+    try {
+      localStorage.setItem(backupKey, JSON.stringify(data));
       console.log(
-        "Score:",
-        score,
-        "Total Questions:",
-        questions.length,
-        "Percentage:",
-        finalPercentage
+        "💾 Data progres disimpan untuk dikirim otomatis 5 menit kemudian:",
+        backupKey
       );
 
-      // Save progress to API
-      dispatch(saveUserExamsProgress(examData))
-        .then((result) => {
-          if (result.type === "userExams/saveUserExamsProgress/fulfilled") {
-            console.log("Progress saved successfully:", result.payload);
-          } else {
-            console.error("Failed to save progress:", result.payload);
-          }
-        })
-        .catch((error) => {
-          console.error("Error saving progress:", error);
-        });
+      setTimeout(() => {
+        retryFailedSubmission(backupKey);
+      }, 5000); // 5 menit
 
-      // Save to localStorage for local state
-      localStorage.setItem("examsScore", newAccumulatedScore.toString());
-
-      // Navigate to results page
-      navigate("/pemula/exam-satu/final-scored", {
-        state: {
-          score,
-          totalQuestions: questions.length,
-          timeTaken: totalExamTime,
-          totalPoints: newAccumulatedScore,
-          percentage: finalPercentage,
-          reviewData: reviewData, // Pass review data to results page
-        },
-      });
+      handleSuccessfulSubmission(finalScore, finalPercentage, duration);
+    } catch (err) {
+      console.error("❌ Gagal menyimpan ke localStorage:", err);
+      alert("Gagal menyimpan progres.");
     }
+  };
+
+  const finishEvaluation = async () => {
+    try {
+      const isAnswersValid = allAnswers.every(
+        (a) =>
+          a &&
+          typeof a.user_answer_attempt_question_id === "number" &&
+          typeof a.user_answer_attempt_answer === "string" &&
+          a.user_answer_attempt_answer.length === 1 &&
+          /^[A-Z]$/.test(a.user_answer_attempt_answer) &&
+          typeof a.user_answer_attempt_is_correct === "boolean" &&
+          typeof a.user_answer_attempt_question_attempt === "number" &&
+          typeof a.user_answer_attempt_created_at === "string"
+      );
+
+      if (!isAnswersValid) {
+        console.error("❌ Jawaban tidak valid:", allAnswers);
+        alert("Jawaban tidak lengkap atau salah format.");
+        return;
+      }
+
+      const evaluationId = Number(id);
+      if (!evaluationId || Number.isNaN(evaluationId)) {
+        console.error("❌ ID evaluasi tidak valid:", id);
+        alert("ID evaluasi tidak valid.");
+        return;
+      }
+
+      if (questions.length === 0 || !evaluationStartTime) {
+        alert("Soal tidak tersedia atau waktu mulai tidak terekam.");
+        return;
+      }
+
+      const finalScore = accumulatedScore + score;
+      const finalPercentage = Math.round((score / questions.length) * 100);
+      const duration = Math.round((Date.now() - evaluationStartTime) / 1000);
+
+      const validAnswers = allAnswers
+        .filter(
+          (a) =>
+            typeof a.user_answer_attempt_question_id === "number" &&
+            typeof a.user_answer_attempt_answer === "string" &&
+            a.user_answer_attempt_answer.length === 1 &&
+            /^[A-Z]$/.test(a.user_answer_attempt_answer)
+        )
+        .map((a) => ({
+          user_answer_attempt_question_id: a.user_answer_attempt_question_id,
+          user_answer_attempt_answer: a.user_answer_attempt_answer,
+          user_answer_attempt_is_correct: a.user_answer_attempt_is_correct,
+          user_answer_attempt_created_at: a.user_answer_attempt_created_at,
+          user_answer_attempt_question_attempt:
+            a.user_answer_attempt_question_attempt,
+        }));
+
+      if (validAnswers.length === 0) {
+        alert("Tidak ada jawaban valid.");
+        return;
+      }
+
+      const batchPayload = {
+        targets: [
+          {
+            user_module_attempt_target_type: 4, // atau 3 jika backend butuh
+            user_module_attempt_target_id: evaluationId,
+            user_module_attempt_percentage_grade: finalPercentage,
+            user_module_attempt_time_duration: duration,
+            user_module_attempt_created_at: new Date().toISOString(),
+            answers: validAnswers,
+          },
+        ],
+      };
+
+      const size = JSON.stringify(batchPayload).length;
+      console.log(`📦 Payload size: ${size} bytes`);
+      console.log(
+        "🕒 Menyimpan payload ke localStorage untuk dikirim 5 menit lagi"
+      );
+
+      // Simpan & jadwalkan kirim 5 menit
+      queueSubmissionForLater(
+        batchPayload,
+        finalScore,
+        finalPercentage,
+        duration,
+        evaluationId
+      );
+    } catch (error) {
+      console.error("❌ Error dalam finishEvaluation:", error);
+      alert("Terjadi kesalahan saat menyelesaikan evaluasi: " + error.message);
+    }
+  };
+
+  const handleSuccessfulSubmission = (
+    newAccumulatedScore,
+    finalPercentage,
+    totalEvaluationTime
+  ) => {
+    // Update attempt number for next time
+    localStorage.setItem(
+      `evaluation_${id}_attempt`,
+      (attemptNumber + 1).toString()
+    );
+
+    // Save to localStorage
+    localStorage.setItem("evaluationScore", newAccumulatedScore.toString());
+
+    // Navigate to results
+    navigateToResults(
+      newAccumulatedScore,
+      finalPercentage,
+      totalEvaluationTime
+    );
+  };
+
+  const retryFailedSubmission = async (localKey) => {
+    try {
+      const saved = localStorage.getItem(localKey);
+      if (!saved) {
+        console.log("🚫 Tidak ada data backup untuk retry");
+        return;
+      }
+
+      const parsed = JSON.parse(saved);
+      if (!parsed || parsed.synced) {
+        console.log("📤 Data sudah di-sync atau tidak valid");
+        return;
+      }
+
+      console.log("🔄 Mencoba kirim ulang data backup...");
+
+      const result = await dispatch(submitBatch(parsed.payload));
+
+      if (submitBatch.fulfilled.match(result)) {
+        parsed.synced = true;
+        parsed.syncedAt = new Date().toISOString();
+        localStorage.setItem(localKey, JSON.stringify(parsed));
+        console.log("✅ Pengiriman ulang berhasil");
+
+        // Update UI if modal is still visible
+        if (showResendModal) {
+          setShowResendModal(false);
+          // Optional: Show success message
+        }
+      } else {
+        console.error(
+          "❌ Pengiriman ulang gagal:",
+          result.payload || result.error
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error saat retry:", error);
+    }
+  };
+
+  const navigateToResults = (
+    newAccumulatedScore,
+    finalPercentage,
+    totalEvaluationTime
+  ) => {
+    navigate("/pemula/evaluation-satu/final-scored", {
+      state: {
+        score,
+        totalQuestions: questions.length,
+        timeTaken: totalEvaluationTime,
+        totalPoints: newAccumulatedScore,
+        percentage: finalPercentage,
+        userModuleAttemptTargetType: 4,
+        reviewData: reviewData,
+      },
+    });
+  };
+
+  const handleContinue = () => {
+    const themeId =
+      location.state?.themeId || localStorage.getItem("selectedThemeId") || "1";
+    navigate(`/tema-belajar/${themeId}`);
   };
 
   // Modal handlers
@@ -235,10 +573,12 @@ const ExamSatu = () => {
   const handleModalRefensi = () => setIsModalReferensiVisible(true);
   const handleModalAnswer = () => setIsModalAnswerVisible(true);
 
+  // Loading state
   if (loading || showSkeleton) {
     return <SkeletonLoader />;
   }
 
+  // Error state
   if (error) {
     return (
       <div className="container mx-auto p-4 text-center">
@@ -253,6 +593,7 @@ const ExamSatu = () => {
     );
   }
 
+  // No questions state
   if (!currentQuestion) {
     return (
       <div className="flex flex-col w-full h-full min-h-screen">
@@ -262,10 +603,10 @@ const ExamSatu = () => {
           <div className="flex flex-col items-center">
             <p>Tidak ada pertanyaan tersedia</p>
             <button
-              onClick={() => navigate("/")}
+              onClick={handleContinue}
               className="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 p-5"
             >
-              Kembali ke Beranda
+              Kembali ke Pembelajaran
             </button>
           </div>
         </div>
@@ -342,6 +683,10 @@ const ExamSatu = () => {
                 }`}
                 onClick={() => handleSelectAnswer(option, index)}
               >
+                {/* ✅ Tampilkan huruf A, B, C, D di depan jawaban */}
+                <span className="font-bold mr-2 hidden">
+                  {getAnswerLetter(index)}.
+                </span>
                 {option}
               </h5>
             ))}
@@ -360,11 +705,11 @@ const ExamSatu = () => {
                 selectedAnswer !== null
                   ? `${getButtonClass()}`
                   : `${getBorderClass()}`
-              } ${saveStatus === "loading" ? "opacity-50" : ""}`}
+              } ${saveLoading ? "opacity-50" : ""}`}
               onClick={handleCheckAnswer}
-              disabled={selectedAnswer === null || saveStatus === "loading"}
+              disabled={selectedAnswer === null || saveLoading}
             >
-              {saveStatus === "loading" && currentIndex === questions.length - 1
+              {saveLoading && currentIndex === questions.length - 1
                 ? "Menyimpan..."
                 : "Cek"}
             </button>
@@ -382,10 +727,9 @@ const ExamSatu = () => {
           {/* Modal for Answer Result */}
           {isModalVisible && (
             <div className="fixed inset-0 z-50 flex justify-center items-center p-5">
-              {/* Overlay redup */}
               <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
-                className={`rounded-xl rounded-b-none w-full m-0 p-6 mt-[550px] items-center justify-center fixed bottom-0  md:max-w-md ${
+                className={`rounded-xl rounded-b-none w-full m-0 p-6 mt-[550px] items-center justify-center fixed bottom-0 md:max-w-md ${
                   isAnswerCorrect ? "bg-[#DCFFD9]" : "bg-[#FFD9D9]"
                 }`}
               >
@@ -423,19 +767,16 @@ const ExamSatu = () => {
                     className={`p-3 w-full rounded-xl mt-4 text-white ${
                       isAnswerCorrect ? "bg-green-500" : "bg-[#A74828]"
                     } ${
-                      saveStatus === "loading" &&
-                      currentIndex === questions.length - 1
+                      saveLoading && currentIndex === questions.length - 1
                         ? "opacity-50"
                         : ""
                     }`}
                     onClick={handleNextQuestion}
                     disabled={
-                      saveStatus === "loading" &&
-                      currentIndex === questions.length - 1
+                      saveLoading && currentIndex === questions.length - 1
                     }
                   >
-                    {saveStatus === "loading" &&
-                    currentIndex === questions.length - 1
+                    {saveLoading && currentIndex === questions.length - 1
                       ? "Menyimpan..."
                       : currentIndex < questions.length - 1
                       ? "Lanjut"
@@ -452,7 +793,6 @@ const ExamSatu = () => {
               className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalAnswerVisible(false)}
             >
-              {/* Overlay redup */}
               <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
                 className="bg-[#DCFFD9] rounded-lg w-96 relative p-5"
@@ -465,13 +805,11 @@ const ExamSatu = () => {
                       Jawaban
                     </span>
                   </h1>
-
                   <div className="text-[16px] overflow-y-scroll max-h-[400px] font-[300]">
                     <p className="mb-2">
                       {currentQuestion?.question_explanation}
                     </p>
                   </div>
-
                   <button
                     onClick={() => setIsModalAnswerVisible(false)}
                     className="p-2 w-full rounded-xl mt-4 sticky bottom-0 z-10 bg-[#28A745] text-white text-[16px] font-[400]"
@@ -489,7 +827,6 @@ const ExamSatu = () => {
               className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalReferensiVisible(false)}
             >
-              {/* Overlay redup */}
               <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
                 className="bg-white rounded-lg w-96 relative p-5"
@@ -499,14 +836,12 @@ const ExamSatu = () => {
                   <h1 className="text-xl font-bold mb-3 z-10 sticky top-0">
                     Bantuan <span className="text-[#F59D09] mx-1">Soal</span>
                   </h1>
-
                   <div className="text-[16px] font-[300] mb-3 overflow-y-scroll max-h-[400px]">
                     <p>
                       {currentQuestion?.question_paragraph_help ||
                         "Tidak ada bantuan untuk soal ini."}
                     </p>
                   </div>
-
                   <button
                     onClick={() => setIsModalReferensiVisible(false)}
                     className="p-3 w-full rounded-xl mt-4 sticky bottom-0 z-10 bg-[#F59D09] text-white"
@@ -524,7 +859,6 @@ const ExamSatu = () => {
               className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalMateriOpen(false)}
             >
-              {/* Overlay redup */}
               <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
                 className="bg-white rounded-lg w-96 relative p-5"
@@ -535,11 +869,9 @@ const ExamSatu = () => {
                     Materi{" "}
                     <span className="text-[#F59D09] mx-1">Pembelajaran</span>
                   </h1>
-
                   <div className="text-[16px] font-[300] mb-3 overflow-y-scroll max-h-[400px]">
                     <p>Konten materi pembelajaran akan ditampilkan di sini.</p>
                   </div>
-
                   <button
                     onClick={() => setIsModalMateriOpen(false)}
                     className="p-3 w-full rounded-xl mt-4 sticky bottom-0 z-10 bg-[#F59D09] text-white"
@@ -557,7 +889,6 @@ const ExamSatu = () => {
               className="fixed inset-0 z-50 flex justify-center items-center p-5"
               onClick={() => setIsModalDonaturOpen(false)}
             >
-              {/* Overlay redup */}
               <div className="absolute inset-0 bg-black opacity-50 z-0"></div>
               <div
                 className="bg-white rounded-lg w-96 relative p-5"
@@ -567,11 +898,9 @@ const ExamSatu = () => {
                   <h1 className="text-xl font-bold mb-3 z-10 sticky top-0">
                     Donatur <span className="text-[#0961F5] mx-1">Info</span>
                   </h1>
-
                   <div className="text-[16px] font-[300] mb-3 overflow-y-scroll max-h-[400px]">
                     <p>Informasi donatur akan ditampilkan di sini.</p>
                   </div>
-
                   <button
                     onClick={() => setIsModalDonaturOpen(false)}
                     className="p-3 w-full rounded-xl mt-4 sticky bottom-0 z-10 bg-[#0961F5] text-white"
@@ -579,6 +908,25 @@ const ExamSatu = () => {
                     Selesai Membaca
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+          {showResendModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+              <div className="bg-white rounded-lg p-6 max-w-sm w-full text-center shadow-lg">
+                <h2 className="text-lg font-semibold mb-3 text-red-600">
+                  Gagal Mengirim Data ke Server
+                </h2>
+                <p className="text-sm text-gray-700">
+                  Progres berhasil disimpan secara lokal namun gagal dikirim ke
+                  server. Kami akan mencoba mengirim ulang dalam waktu 5 menit.
+                </p>
+                <button
+                  onClick={() => setShowResendModal(false)}
+                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Tutup
+                </button>
               </div>
             </div>
           )}

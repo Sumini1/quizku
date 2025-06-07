@@ -210,19 +210,28 @@ const FinalScoredExamSatu = () => {
 
       <div className="flex justify-center w-full min-h-screen">
         <div className={`flex flex-col max-w-md w-full ${middleTheme()}`}>
-          {/* Header Section - Compact */}
-          <div className="text-center px-4 py-3">
-            <div
-              className={`inline-flex items-center px-3 py-1 mt-5 rounded-full ${gradeInfo.bgColor} ${gradeInfo.color} mb-2`}
-            >
-              <HiBadgeCheck className="text-lg mr-1" />
-              <span className="font-semibold text-xl ">{gradeInfo.status}</span>
-            </div>
-            <p className="text-sm font-medium">{celebrationMessage}</p>
+          {/* Header Section with close button - matching EvaluationSatu */}
+          <div className="flex items-center justify-between p-5 mt-2">
+            <IoClose
+              className="text-3xl font-bold cursor-pointer"
+              onClick={() => navigate("/beranda")}
+            />
+            <div className="flex-1" />
           </div>
 
-          {/* Score Circle - Smaller and Centered */}
-          <div className="flex justify-center ">
+          {/* Status Badge - Compact */}
+          <div className="text-center px-5">
+            <div
+              className={`inline-flex items-center px-4 py-2 rounded-full ${gradeInfo.bgColor} ${gradeInfo.color} mb-3`}
+            >
+              <HiBadgeCheck className="text-lg mr-2" />
+              <span className="font-semibold text-lg">{gradeInfo.status}</span>
+            </div>
+            <p className="text-sm font-medium mb-4">{celebrationMessage}</p>
+          </div>
+
+          {/* Score Circle - Centered */}
+          <div className="flex justify-center mb-6">
             <div className="relative w-32 h-32">
               <svg
                 className="w-full h-full transform -rotate-90"
@@ -263,14 +272,14 @@ const FinalScoredExamSatu = () => {
           </div>
 
           {/* Results Grid - More Compact */}
-          <div className="grid grid-cols-2 gap-3 px-4">
+          <div className="grid grid-cols-2 gap-4 px-5 mb-6">
             {items.map((item) => (
               <div
                 key={item.id}
-                className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm text-center"
+                className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm text-center"
               >
                 <div className="flex justify-center mb-2">
-                  <div className={`p-1 rounded-md ${getBorderColor()}`}>
+                  <div className={`p-2 rounded-lg ${getBorderColor()}`}>
                     {item.icon}
                   </div>
                 </div>
@@ -280,96 +289,94 @@ const FinalScoredExamSatu = () => {
             ))}
           </div>
 
-          {/* Action buttons - Fixed at bottom without scroll */}
-          <div className="mt-auto p-4 space-y-2">
+          {/* Action buttons - Fixed at bottom */}
+          <div className="mt-auto p-5 space-y-3">
             {/* Review answers button */}
             {reviewData.length > 0 && (
               <button
                 onClick={handleNavigateToReview}
-                className="w-full p-2 rounded-lg border border-gray-200 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                className="w-full p-3 rounded-xl border border-gray-200 flex items-center justify-between hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center">
-                  <MdOutlineError className="text-lg mr-2" />
-                  <span className="font-medium text-sm">Lihat Pembahasan</span>
+                  <MdOutlineError className="text-lg mr-3" />
+                  <span className="font-medium">Lihat Pembahasan</span>
                 </div>
                 <FaArrowRight className="text-sm" />
               </button>
             )}
 
-            {/* Bottom action buttons with space-between */}
-            <div className="flex justify-between items-center space-x-2">
-              {/* Retake quiz button - now as icon */}
+            {/* Bottom action buttons */}
+            <div className="flex justify-between items-center gap-3">
+              {/* Retake quiz button */}
               <button
                 onClick={handleRetakeQuiz}
-                className={`w-12 h-12 border ${getBorderClass()} rounded-lg hover:opacity-80 transition-opacity flex items-center justify-center`}
+                className={`w-12 h-12 border ${getBorderClass()} rounded-xl hover:opacity-80 transition-opacity flex items-center justify-center`}
               >
-                <TbArrowBackUp className="text-lg" />
+                <TbArrowBackUp className="text-xl" />
               </button>
 
               {/* Continue button */}
               <button
                 onClick={handleContinue}
-                className={`flex-1 p-3 border-none rounded-lg ${getButtonClass()} text-white font-medium hover:opacity-90 transition-opacity`}
+                className={`flex-1 p-3 rounded-xl border-none ${getButtonClass()} text-white font-medium hover:opacity-90 transition-opacity`}
               >
                 Lanjutkan Belajar
               </button>
             </div>
           </div>
 
-          {/* Modal for additional options */}
+          {/* Modal for additional options - Updated styling to match */}
           {isModalOpen && (
-            <div className="fixed inset-0 z-50 flex justify-center items-center p-4">
+            <div className="fixed inset-0 z-50 flex justify-center items-center p-5">
               <div
                 className="absolute inset-0 bg-black opacity-50"
                 onClick={handleCloseModal}
               ></div>
-              <div className="bg-white rounded-xl w-full max-w-sm relative p-4">
-                <div className="flex justify-between items-center mb-3">
-                  <h2 className="text-lg font-bold">Pilihan Lanjutan</h2>
+              <div
+                className="bg-white rounded-xl w-full max-w-sm relative p-5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold">Pilihan Lanjutan</h2>
                   <IoClose
-                    className="text-xl cursor-pointer"
+                    className="text-2xl cursor-pointer"
                     onClick={handleCloseModal}
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <button
-                    onClick={handleNavigateToReview}
-                    className="w-full p-2 text-left border border-gray-200 rounded-lg hover:bg-gray-50"
-                  >
-                    <span className="text-sm">📝 Lihat Pembahasan Lengkap</span>
-                  </button>
+                <div className="space-y-3">
+                  {reviewData.length > 0 && (
+                    <button
+                      onClick={handleNavigateToReview}
+                      className="w-full p-3 text-left border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+                    >
+                      <span>📝 Lihat Pembahasan Lengkap</span>
+                    </button>
+                  )}
 
                   <button
                     onClick={() => navigate("/beranda")}
-                    className="w-full p-2 text-left border border-gray-200 rounded-lg hover:bg-gray-50 mb-2"
+                    className="w-full p-3 text-left border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
                   >
-                    <span className="text-sm">🏠 Kembali ke Beranda</span>
+                    <span>🏠 Kembali ke Beranda</span>
                   </button>
 
-                  <div className="flex space-x-2">
+                  <div className="flex gap-3">
                     <button
                       onClick={handleRetakeQuiz}
-                      className="w-12 h-12 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center"
+                      className={`w-12 h-12 border ${getBorderClass()} rounded-xl hover:opacity-80 transition-opacity flex items-center justify-center`}
                     >
-                      <TbArrowBackUp className="text-2xg text-green-600 font-bold" />
+                      <TbArrowBackUp className="text-xl text-green-600" />
                     </button>
 
                     <button
                       onClick={handleContinue}
-                      className="flex-1 p-3 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors"
+                      className={`flex-1 p-3 rounded-xl ${getButtonClass()} text-white font-medium hover:opacity-90 transition-opacity`}
                     >
                       Lanjutkan
                     </button>
                   </div>
                 </div>
-
-                <button
-                  onClick={handleContinue}
-                  className={`w-full p-2 rounded-lg mt-3 ${getButtonClass()} text-white font-medium text-sm`}
-                >
-                  Lanjutkan Pembelajaran
-                </button>
               </div>
             </div>
           )}

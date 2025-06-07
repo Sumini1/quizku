@@ -47,9 +47,12 @@ import userQuizzesReducer from "../Features/Quizzess/Reducer/userQuizzes";
 import userSurveysReducer from "../Features/Survey/Reducer/userSurveys";
 import questionsSurveyReducer from "../Features/Survey/Reducer/questionsSurvey";
 import testExamsReducer from "../Features/Survey/Reducer/testExams";
-import questionsTestReducer  from "../Features/Survey/Reducer/questionsTest";
+import questionsTestReducer from "../Features/Survey/Reducer/questionsTest";
 import userTestReducer from "../Features/Survey/Reducer/userTest";
-// import userSubcategoryReducer from "../Features/Subcategory/Reducer/subcategory";
+import submitBatchReducer from "../Features/Evaluations/Reducer/submitBatch";
+import userProfileReducer from "../pages/ButtonMobile/BerandaPage/SettingsPage/Reducer/userProfil";
+import quotesReducer from "../pages/ButtonMobile/Reducer/quotesSlice";
+
 
 // Import thunks
 import {
@@ -86,8 +89,9 @@ export const store = configureStore({
     testExams: testExamsReducer,
     questionsTest: questionsTestReducer,
     userTest: userTestReducer,
-    // userSubcategory: userSubcategoryReducer
-
+    submitBatch: submitBatchReducer,
+    userProfile: userProfileReducer,
+    quotes: quotesReducer
   },
 });
 

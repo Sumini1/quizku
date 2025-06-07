@@ -8,6 +8,7 @@ import {
   IoCloseCircle,
   IoTime,
 } from "react-icons/io5";
+import { FaArrowLeft } from "react-icons/fa6";
 import { MdLightbulb } from "react-icons/md";
 
 const UlasanSoal = () => {
@@ -20,6 +21,11 @@ const UlasanSoal = () => {
   const [score, setScore] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [percentage, setPercentage] = useState(0);
+  const [targetType, setTargetType] = useState(null);
+  const [targetId, setTargetId] = useState(null);
+  const [totalTimeTaken, setTotalTimeTaken] = useState(0);
+  const [themeId, setThemeId] = useState(null);
+
   const [explanationVisible, setExplanationVisible] = useState({});
 
   useEffect(() => {
@@ -76,7 +82,8 @@ const UlasanSoal = () => {
   return (
     <div className="flex justify-center w-full min-h-screen">
       <div className={`flex flex-col max-w-xl w-full ${middleTheme()} p-4`}>
-        <div className="text-start mb-6">
+        <div onClick={() => navigate(-1)} className="text-start mb-6 flex gap-2 items-center">
+          <FaArrowLeft className="font-bold text-2xl"/>
           <h1 className="text-lg font-bold">Ulasan Soal</h1>
           {/* <p className="text-sm text-gray-500">
             Skor Anda: {score}/{totalQuestions} ({percentage}%)

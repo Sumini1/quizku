@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { FaFileArchive } from "react-icons/fa";
 import { FaCircleUser } from "react-icons/fa6";
 import { useTheme } from "../../../Context/ThemeContext";
@@ -6,26 +6,89 @@ import ButtonNavbar from "../../../Components/ListButton/ButtonNavbar";
 import { MdOutlineError } from "react-icons/md";
 import { MdAccessTimeFilled } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
-import pemula from "../../../assets/beranda/pemula.png"
-import lencana from "../../../assets/beranda/lencana.png"
-import toko  from "../../../assets/beranda/toko.png"
-import kontributor from "../../../assets/beranda/people.png"
-import compass from "../../../assets/beranda/compass.png"
-import website from "../../../assets/beranda/website.png"
-import notifikasi from "../../../assets/beranda/notifikasi.png"
-import emerald from "../../../assets/beranda/emerald.png"
-import book from "../../../assets/beranda/book.png"
-import quran from "../../../assets/beranda/quran.png"
-import kaaba from "../../../assets/beranda/kaaba.png"
-import tematik from "../../../assets/beranda/tematik.png"
-import artikel from "../../../assets/beranda/artikel.png"
-import kuisKilat from "../../../assets/beranda/kuiskilat.png"
-import tantangan from "../../../assets/beranda/tantangan.png"
-import lainnya from "../../../assets/beranda/lainnya.png"
-import gambar from  "../../../assets/beranda/gambar.png"
+import pemula from "../../../assets/beranda/pemula.png";
+import lencana from "../../../assets/beranda/lencana.png";
+import toko from "../../../assets/beranda/toko.png";
+import kontributor from "../../../assets/beranda/people.png";
+import compass from "../../../assets/beranda/compass.png";
+import website from "../../../assets/beranda/website.png";
+import notifikasi from "../../../assets/beranda/notifikasi.png";
+import emerald from "../../../assets/beranda/emerald.png";
+import book from "../../../assets/beranda/book.png";
+import quran from "../../../assets/beranda/quran.png";
+import kaaba from "../../../assets/beranda/kaaba.png";
+import tematik from "../../../assets/beranda/tematik.png";
+import artikel from "../../../assets/beranda/artikel.png";
+import kuisKilat from "../../../assets/beranda/kuiskilat.png";
+import tantangan from "../../../assets/beranda/tantangan.png";
+import lainnya from "../../../assets/beranda/lainnya.png";
+import gambar from "../../../assets/beranda/gambar.png";
+import { fetchQuotes, setDailyQuote } from "../Reducer/quotesSlice";
+import { useDispatch, useSelector } from "react-redux";
 
+// Utility function untuk format quote text
+const formatQuoteText = (text) => {
+  if (!text)
+    return "Bacalah dengan menyebut nama Tuhanmu yang menciptakan. (QS. Al-Alaq: 1)";
+
+  // Jika text terlalu panjang, potong dan tambahkan "..."
+  if (text.length > 150) {
+    return text.substring(0, 150) + "...";
+  }
+
+  return text;
+};
+
+// Function untuk cek apakah perlu fetch ulang
+const shouldRefetchQuotes = (lastFetchDate) => {
+  if (!lastFetchDate) return true;
+
+  const today = new Date().toDateString();
+  return lastFetchDate !== today;
+};
 
 const Beranda = () => {
+ const dispatch = useDispatch();
+ const {
+   data: quotes,
+   currentBatch,
+   totalAvailableBatch,
+   status,
+   error,
+   dailyQuote,
+   lastFetchDate,
+ } = useSelector((state) => state.quotes);
+
+//  // Enhanced debugging
+//  console.log("=== DEBUGGING QUOTES STATE ===");
+//  console.log("Raw quotes data:", quotes);
+//  console.log("Quotes length:", quotes?.length);
+//  console.log("Current batch:", currentBatch);
+//  console.log("Total available batch:", totalAvailableBatch);
+//  console.log("Status:", status);
+//  console.log("Error:", error);
+//  console.log("Daily quote:", dailyQuote);
+//  console.log("Last fetch date:", lastFetchDate);
+//  console.log("=== END DEBUGGING ===");
+
+ useEffect(() => {
+   if (status === "idle" || shouldRefetchQuotes(lastFetchDate)) {
+     console.log("Dispatching fetchQuotes...");
+     dispatch(fetchQuotes());
+   } else if (quotes && quotes.length > 0 && !dailyQuote) {
+     console.log("Setting daily quote from existing data...");
+     dispatch(setDailyQuote(quotes));
+   }
+ }, [dispatch, status, lastFetchDate, quotes, dailyQuote]);
+
+ // Tambahkan debugging untuk formatQuoteText
+ const formattedQuoteText = useMemo(() => {
+   const text = formatQuoteText(dailyQuote?.quote_text);
+   console.log("Formatted quote text:", text);
+   console.log("Original quote text:", dailyQuote?.quote_text);
+   return text;
+ }, [dailyQuote?.quote_text]);
+
   const navigate = useNavigate();
   const kotak = [
     {
@@ -86,21 +149,21 @@ const Beranda = () => {
       progress: 2 / 3,
     },
     {
-      id: 1,
+      id: 2,
       name: "Dasar Islam",
       title: "Muamalan",
       ket: "3 Hari yang lalu",
       progress: 2 / 3,
     },
     {
-      id: 1,
+      id: 3,
       name: "Dasar Islam",
       title: "Keimanan",
       ket: "3 Hari yang lalu",
       progress: 1 / 3,
     },
     {
-      id: 1,
+      id: 4,
       name: "Dasar Islam",
       title: "Muamalah",
       ket: "3 Hari yang lalu",
@@ -111,28 +174,28 @@ const Beranda = () => {
   const materiTerbaru = [
     {
       id: 1,
-      image: <img src={gambar} alt=""  />,
+      image: <img src={gambar} alt="" />,
       name: "Dasar Islam",
       title: "Keimanan",
       ket: "3 Hari yang lalu",
     },
     {
-      id: 1,
-      image: <img src={gambar} alt=""  />,
+      id: 2,
+      image: <img src={gambar} alt="" />,
       name: "Dasar Islam",
       title: "Muamalah",
       ket: "3 Hari yang lalu",
     },
     {
-      id: 1,
-      image: <img src={gambar} alt=""  />,
+      id: 3,
+      image: <img src={gambar} alt="" />,
       name: "Dasar Islam",
       title: "Keimanan",
       ket: "3 Hari yang lalu",
     },
     {
-      id: 1,
-      image: <img src={gambar} alt=""  />,
+      id: 4,
+      image: <img src={gambar} alt="" />,
       name: "Dasar Islam",
       title: "Muamalah",
       ket: "3 Hari yang lalu",
@@ -152,7 +215,7 @@ const Beranda = () => {
       id: 1,
       name: "Toko",
       link: "/toko-berlian",
-      image: <img src={toko} alt="toko"  />,
+      image: <img src={toko} alt="toko" />,
     },
     {
       id: 2,
@@ -164,19 +227,19 @@ const Beranda = () => {
       id: 3,
       name: "Jelajahi Kami",
       link: "/jelajahi-aplikasi",
-      image: <img src={compass} alt="kontributor"  />,
+      image: <img src={compass} alt="kontributor" />,
     },
     {
       id: 4,
       name: "Website",
       link: "/settings",
-      image: <img src={website} alt="kontributor"  />,
+      image: <img src={website} alt="kontributor" />,
     },
     {
       id: 5,
       name: "Notifikasi",
       link: "/notifikasi",
-      image: <img src={notifikasi} alt="kontributor"  />,
+      image: <img src={notifikasi} alt="kontributor" />,
     },
   ];
 
@@ -203,7 +266,7 @@ const Beranda = () => {
               <div className="flex items-center gap-4 px-2 py-3">
                 <div className="flex items-center gap-2">
                   <h1 className={`text-2xl font-semibold ${getTextTitle()}`}>
-                    Edu Learn
+                    Quizku
                   </h1>
                 </div>
                 <FaCircleUser
@@ -220,9 +283,25 @@ const Beranda = () => {
                 <h1 className="text-xl font-semibold">
                   Assalamualaikum, Sdr. Budi
                 </h1>
-                <h1 className={`text-base font-semibold text-white`}>
-                  " Sesungguhnya ilmu adalah rasa takut kepada Allah ta'ala ".
-                </h1>
+
+                {/* Quote Harian */}
+                <div className="min-h-[40px] flex items-center">
+                  {status === "loading" ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span className="text-base font-medium text-white opacity-75">
+                        Memuat quote hari ini...
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="text-base font-medium text-white leading-relaxed">
+                      {/* <div>Status: {status}</div>
+                      <div>Quotes count: {quotes?.length || 0}</div>
+                      <div>Has daily quote: {dailyQuote ? "Yes" : "No"}</div> */}
+                      <div>{formattedQuoteText}</div>
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex flex-col justify-between gap-6">
                   <div

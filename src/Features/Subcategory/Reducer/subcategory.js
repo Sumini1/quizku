@@ -5,27 +5,29 @@ import api from "../../Auth/Reducer/axios" //
 export const fetchSubcategory = createAsyncThunk(
   "subcategories/fetch",
   async (difficultyId, { rejectWithValue }) => {
+    if (!difficultyId) {
+      return rejectWithValue("difficultyId tidak boleh kosong");
+    }
+
     try {
       const response = await api.get(
         `u/user-subcategory/category/difficulty/${difficultyId}`
       );
       const responseData = response.data;
 
-      // Validasi data
       if (!responseData?.data || !Array.isArray(responseData.data)) {
         return rejectWithValue("Format data tidak valid");
       }
 
-      // Kembalikan hanya data yang dibutuhkan
       return responseData.data;
     } catch (error) {
-      // Tangani error dari Axios atau error lainnya
       const errorMessage =
         error.response?.data?.message || error.message || "Terjadi kesalahan";
       return rejectWithValue(errorMessage);
     }
   }
 );
+
 
 export const fetchCreateUserSubcategory = createAsyncThunk(
   "subcategories/fetchCreate",

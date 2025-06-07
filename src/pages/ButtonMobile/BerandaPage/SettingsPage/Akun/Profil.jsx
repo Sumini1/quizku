@@ -2,99 +2,100 @@ import React, { useState, useEffect } from "react";
 import { FaArrowLeft } from "react-icons/fa6";
 import { AiFillEdit } from "react-icons/ai";
 import { useTheme } from "../../../../../Context/ThemeContext";
-import { Link, useNavigate } from "react-router-dom";
-// import { useDispatch, useSelector } from "react-redux";
-// import { saveUserCreate, setUser } from "../../Reducer/userProfile";
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { saveUserCreate, getUserProfile } from "../Reducer/userProfil";
 
 const Profil = () => {
-//   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { theme, getBorder, getButtonClass, getBorderClass, middleTheme } =
-    useTheme();
-//   const userData = useSelector((state) => state.userProfile.user);
+  const dispatch = useDispatch();
+  const { getBorder, getButtonClass, middleTheme } = useTheme();
 
-//   const saveUserToLocal = (user) => {
-//     localStorage.setItem("userProfile", JSON.stringify(user));
-//   };
+  const {
+    data: userData,
+    loading,
+    error,
+  } = useSelector((state) => state.userProfile);
 
-//   const loadUserFromLocal = () => {
-//     const data = localStorage.getItem("userProfile");
-//     return data ? JSON.parse(data) : null;
-//   };
+  const [form, setForm] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-//   const [form, setForm] = useState({
-//     donation_name: "",
-//     full_name: "",
-//     date_of_birth: "",
-//     gender: "",
-//     phone_number: "",
-//     bio: "",
-//     location: "",
-//     occupation: "",
-//   });
+  // Ambil data user saat mount
+  useEffect(() => {
+    dispatch(getUserProfile());
+  }, [dispatch]);
 
-//   useEffect(() => {
-//     if (userData) {
-//       setForm({
-//         donation_name: userData.donation_name || "",
-//         full_name: userData.full_name || "",
-//         date_of_birth: userData.date_of_birth?.split("T")[0] || "",
-//         gender: userData.gender || "",
-//         phone_number: userData.phone_number || "",
-//         bio: userData.bio || "",
-//         location: userData.location || "",
-//         occupation: userData.occupation || "",
-//       });
-//       saveUserToLocal(userData);
-//     } else {
-//       const localUser = loadUserFromLocal();
-//       if (localUser) {
-//         setForm({
-//           donation_name: localUser.donation_name || "",
-//           full_name: localUser.full_name || "",
-//           date_of_birth: localUser.date_of_birth?.split("T")[0] || "",
-//           gender: localUser.gender || "",
-//           phone_number: localUser.phone_number || "",
-//           bio: localUser.bio || "",
-//           location: localUser.location || "",
-//           occupation: localUser.occupation || "",
-//         });
-//         dispatch(setUser(localUser));
-//       }
-//     }
-//   }, [userData, dispatch]);
+  // Isi form hanya setelah data tersedia
+  useEffect(() => {
+    if (userData) {
+      setForm({
+        donation_name: userData.donation_name ?? "",
+        full_name: userData.full_name ?? "",
+        date_of_birth: userData.date_of_birth
+          ? userData.date_of_birth.split("T")[0]
+          : "",
+        gender: userData.gender ?? "",
+        phone_number: userData.phone_number ?? "",
+        bio: userData.bio ?? "",
+        location: userData.location ?? "",
+        occupation: userData.occupation ?? "",
+      });
+    }
+  }, [userData]);
 
-//   const handleChange = (e) => {
-//     setForm({ ...form, [e.target.name]: e.target.value });
-//   };
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     const userId = localStorage.getItem("id");
-//     if (!userId) return alert("User ID tidak ditemukan di localStorage");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
-//     const payload = {
-//       user_id: userId,
-//       ...form,
-//       date_of_birth: new Date(form.date_of_birth).toISOString(),
-//     };
+    const requiredFields = ["full_name", "donation_name"];
+    const missingFields = requiredFields.filter(
+      (field) => !form[field] || form[field].trim() === ""
+    );
 
-//     try {
-//       const result = await dispatch(saveUserCreate(payload));
-//       if (saveUserCreate.fulfilled.match(result)) {
-//         alert("✅ Profil berhasil disimpan!");
-//         const updatedUser = { ...form, user_id: userId };
-//         dispatch(setUser(updatedUser));
-//         saveUserToLocal(updatedUser);
-//       } else {
-//         alert(
-//           `❌ Gagal menyimpan profil: ${result.payload || "Terjadi kesalahan"}`
-//         );
-//       }
-//     } catch (err) {
-//       alert(`❌ Error: ${err.message || "Terjadi kesalahan"}`);
-//     }
-//   };
+    if (missingFields.length > 0) {
+      alert(`❌ Field berikut wajib diisi: ${missingFields.join(", ")}`);
+      setIsSubmitting(false);
+      return;
+    }
+
+    const payload = {
+      ...form,
+      date_of_birth: form.date_of_birth
+        ? new Date(form.date_of_birth).toISOString()
+        : null,
+    };
+
+    try {
+      const result = await dispatch(saveUserCreate(payload));
+      if (saveUserCreate.fulfilled.match(result)) {
+        alert("✅ Profil berhasil disimpan!");
+        dispatch(getUserProfile()); // Refresh
+      } else {
+        const errorMessage =
+          result.payload || result.error?.message || "Terjadi kesalahan";
+        alert(`❌ Gagal menyimpan profil: ${errorMessage}`);
+      }
+    } catch (err) {
+      alert(`❌ Error: ${err.message || "Terjadi kesalahan tak terduga"}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Saat data masih loading atau belum siap
+  if (loading || !form) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Memuat profil...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 md:px-5 min-h-screen w-full h-full">
@@ -113,85 +114,99 @@ const Profil = () => {
           insya Allah akan kami lindungi.
         </p>
 
-        <form className="flex flex-col gap-4">
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            Error: {error}
+          </div>
+        )}
+
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <InputField
             label="Nama Lengkap"
             name="full_name"
-            // value={form.full_name}
-            // onChange={handleChange}
-            placeholder="Budi"
+            value={form.full_name}
+            onChange={handleChange}
           />
           <InputField
             label="Nama Donatur"
             name="donation_name"
-            // value={form.donation_name}
-            // onChange={handleChange}
-            placeholder="Budi"
+            value={form.donation_name}
+            onChange={handleChange}
           />
           <InputField
             label="Nomor Telepon"
             name="phone_number"
-            // value={form.phone_number}
-            // onChange={handleChange}
-            placeholder="081234567890"
+            value={form.phone_number}
+            onChange={handleChange}
           />
           <InputField
             label="Domisili"
             name="location"
-            // value={form.location}
-            // onChange={handleChange}
-            placeholder="Jakarta"
+            value={form.location}
+            onChange={handleChange}
           />
           <InputField
             label="Tanggal Lahir"
             name="date_of_birth"
             type="date"
-            // value={form.date_of_birth}
-            // onChange={handleChange}
-            placeholder="YYYY-MM-DD"
+            value={form.date_of_birth}
+            onChange={handleChange}
           />
           <InputField
             label="Pekerjaan"
             name="occupation"
-            // value={form.occupation}
-            // onChange={handleChange}
-            placeholder="Mahasiswa"
+            value={form.occupation}
+            onChange={handleChange}
           />
           <InputField
             label="Bio"
             name="bio"
-            // value={form.bio}
-            // onChange={handleChange}
-            placeholder="Pencinta Ilmu"
+            value={form.bio}
+            onChange={handleChange}
           />
-          <InputField
-            label="Jenis Kelamin"
-            name="gender"
-            // value={form.gender}
-            // onChange={handleChange}
-            placeholder="male / female"
-          />
+
+          {/* Select Gender */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="gender"
+              className="text-sm font-medium text-gray-700"
+            >
+              Jenis Kelamin
+            </label>
+            <div
+              className={`flex text-sm font-medium items-center border ${getBorder()} rounded-lg p-2`}
+            >
+              <select
+                id="gender"
+                name="gender"
+                value={form.gender}
+                onChange={handleChange}
+                className="flex-1 bg-transparent focus:outline-none"
+              >
+                <option value="">Pilih Jenis Kelamin</option>
+                <option value="male">Laki-laki</option>
+                <option value="female">Perempuan</option>
+              </select>
+              <AiFillEdit className="text-gray-400 cursor-pointer" />
+            </div>
+          </div>
+
           <button
             type="submit"
-            className={`border-none rounded-xl p-3 ${getButtonClass()} mt-5 md:mt-20`}
+            disabled={isSubmitting}
+            className={`border-none rounded-xl p-3 ${getButtonClass()} mt-5 md:mt-20 ${
+              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Simpan
+            {isSubmitting ? "Menyimpan..." : "Simpan"}
           </button>
-         
         </form>
       </div>
     </div>
   );
 };
 
-const InputField = ({
-  label,
-  name,
-  value,
-  onChange,
-  type = "text",
-  placeholder = "",
-}) => {
+const InputField = ({ label, name, value, onChange, type = "text" }) => {
   const { getBorder } = useTheme();
   return (
     <div className="flex flex-col gap-1">
@@ -206,7 +221,6 @@ const InputField = ({
           name={name}
           type={type}
           value={value}
-          placeholder={placeholder}
           onChange={onChange}
           className="flex-1 bg-transparent focus:outline-none"
         />

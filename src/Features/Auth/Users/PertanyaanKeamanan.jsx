@@ -1,68 +1,44 @@
 import React, { useState, useEffect } from "react";
-import { FaArrowLeft, FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
-import { useTheme } from "../../../Context/ThemeContext";
-import { useDispatch, useSelector } from "react-redux";
-import { FiLoader } from "react-icons/fi";
-import { HiBadgeCheck } from "react-icons/hi";
-import Swal from "sweetalert2";
-import { fetchForgotPassword } from "../Reducer/forgotPasswordCheck";
+import {
+  ChevronLeft,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  CheckCircle,
+} from "lucide-react";
 
 const PertanyaanKeamanan = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [activeIndex, setActiveIndex] = useState(null);
-  const {
-    getThemeModalCategory,
-    middleTheme,
-    getButtonClass,
-    getBorderClass,
-    getIconTheme,
-  } = useTheme();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { forgotPasswordData, isLoading } = useSelector(
-    (state) => state.forgotPassword
-  );
+  // Mock data - replace with your actual Redux state
+  const forgotPasswordData = { email: "test@example.com" };
 
   const [securityData, setSecurityData] = useState({
     security_question: "",
     security_answer: "",
   });
 
-  // Cek apakah data registrasi sudah ada
-  useEffect(() => {
-    if (!forgotPasswordData.email) {
-      // Jika belum ada data registrasi, kembali ke halaman registrasi
-      Swal.fire({
-        title: "Error",
-        text: "Silakan isi data registrasi terlebih dahulu",
-        icon: "error",
-      }).then(() => {
-        navigate("/login");
-      });
-    }
-  }, [forgotPasswordData, navigate]);
+  // Questions array
+  const questions = [
+    "Nama keluarga, saudara, guru, teman terdekat",
+    "Salah satu istilah dalam islam",
+    "Apa nama hewan peliharaanmu?",
+    "Nama tokoh dalam islam",
+  ];
 
   // Handle accordion toggling
   const toggleAccordion = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
   };
 
-  // Questions array
-  const questions = [
-    "Nama keluarga, saudara, guru, teman terdekat",
-    "Salah satu istilah dalam islam",
-    "Apa nama hewan peliharaanmu? ",
-    "Nama tokoh dalam islam",
-  ];
-
-  // Handle question selection - sets the selected question to securityData
+  // Handle question selection
   const handleQuestionSelect = (question) => {
     setSecurityData({
       ...securityData,
       security_question: question,
     });
-    setActiveIndex(null); // Close accordion after selection
+    setActiveIndex(null);
   };
 
   // Handle answer input change
@@ -76,149 +52,149 @@ const PertanyaanKeamanan = () => {
   // Handle form submission
   const handleSubmit = () => {
     if (!securityData.security_question || !securityData.security_answer) {
-      Swal.fire({
-        title: "Error",
-        text: "Silakan pilih pertanyaan keamanan dan berikan jawaban",
-        icon: "error",
-      });
+      alert("Silakan pilih pertanyaan keamanan dan berikan jawaban");
       return;
     }
 
-    // Gabungkan data registrasi dengan data pertanyaan keamanan
-    const completeData = {
-      ...forgotPasswordData,
-      security_question: securityData.security_question,
-      security_answer: securityData.security_answer,
-    };
+    setIsLoading(true);
 
-    // Dispatch ke Redux untuk registrasi
-    dispatch(fetchForgotPassword(completeData))
-      .unwrap()
-      .then(() => {
-        Swal.fire({
-          title: "Sukses",
-          text: "Pemulihan akun sedikit lagi, silahkan isi password baru",
-          icon: "success",
-        }).then(() => {
-          navigate("/new-password");
-        });
-      })
-      .catch((error) => {
-        Swal.fire({
-          title: "Error",
-          text:
-            "Terjadi kesalahan saat registrasi: " +
-            (error.message || "Unknown error"),
-          icon: "error",
-        });
-      });
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      alert("Sukses! Pemulihan akun sedikit lagi, silahkan isi password baru");
+    }, 2000);
   };
 
-  return (
-    <div className="flex flex-col min-h-screen w-full h-full">
-      <div
-        className={`py-2 flex flex-col text-xl  flex-grow max-w-md mx-auto w-full ${middleTheme()} md:text-base`}
-      >
-        <div className="flex justify-between p-5 -mt-3">
-          <div className="flex flex-col  gap-3">
-            <FaArrowLeft
-              onClick={() => navigate(-1)}
-              className="cursor-pointer"
-            />
-            <h1 className="font-semibold text-2xl md:text-lg">
-              Pertanyaan Keamanan
-            </h1>
-          </div>
-        </div>
+  const handleBack = () => {
+    console.log("Navigate back");
+  };
 
-        <div className="flex flex-col p-5 ">
-          <div className="bg-white  rounded-lg mb-2">
-            <p className="text-lg font-medium md:text-base -mt-3">
+  const isFormComplete =
+    securityData.security_question && securityData.security_answer.trim();
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3">
+        <div className="flex items-center gap-4 max-w-md mx-auto">
+          <button
+            onClick={handleBack}
+            className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-lg font-semibold text-gray-900">
+            Pertanyaan Keamanan
+          </h1>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 py-6">
+        <div className="max-w-md mx-auto space-y-6">
+          {/* Description */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
               Mohon diisi karena jawaban akan digunakan apabila lupa password
             </p>
           </div>
 
-          {/* Selected question display */}
-          <div className="bg-white rounded-xl rounded-b-none overflow-hidden border border-gray-300">
-            <div
-              className="flex justify-between text-base font-medium items-center p-3 cursor-pointer"
-              onClick={() => toggleAccordion(0)}
-            >
-              <span>
-                {securityData.security_question ||
-                  "Nama keluarga, saudara, guru, teman terdekat"}
-              </span>
-              <span className="text-gray-400 text-base font-medium flex items-center -mt-4 md:mt-0">
+          {/* Security Question Form */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            {/* Question Selector */}
+            <div className="border-b border-gray-200">
+              <button
+                type="button"
+                className="w-full p-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+                onClick={() => toggleAccordion(0)}
+              >
+                <span className="text-sm font-medium text-gray-900">
+                  {securityData.security_question ||
+                    "Pilih pertanyaan keamanan"}
+                </span>
                 {activeIndex === 0 ? (
-                  <FaChevronUp className="text-gray-500" />
+                  <ChevronUp className="w-4 h-4 text-gray-500" />
                 ) : (
-                  <FaChevronDown className="text-gray-500" />
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
                 )}
-              </span>
+              </button>
+
+              {/* Dropdown Questions */}
+              {activeIndex === 0 && (
+                <div className="border-t border-gray-200 bg-gray-50">
+                  {questions.map((question, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      className="w-full p-4 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
+                      onClick={() => handleQuestionSelect(question)}
+                    >
+                      {question}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Dropdown list of questions */}
-            {activeIndex === 0 && (
-              <div className="border-t">
-                {questions.map((question, index) => (
-                  <div
-                    key={index}
-                    className={`p-3 border-b last:border-b-0 text-base font-medium cursor-pointer hover:bg-gray-50 
-                  }`}
-                    onClick={() => handleQuestionSelect(question)}
-                  >
-                    <p>{question}</p>
-                  </div>
-                ))}
+            {/* Answer Input */}
+            <div className="p-4">
+              <input
+                type="text"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Jawaban Saya"
+                value={securityData.security_answer}
+                onChange={handleAnswerChange}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Fixed Bottom Button */}
+      <div className="bg-white border-t border-gray-200 ">
+        <div className="max-w-md mx-auto">
+          <button
+            type="button"
+            className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
+              isFormComplete
+                ? "bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+            }`}
+            onClick={handleSubmit}
+            disabled={!isFormComplete || isLoading}
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Memproses...</span>
               </div>
+            ) : (
+              "Daftar"
             )}
-          </div>
-
-          {/* Answer input field */}
-          <div className="rounded-xl rounded-t-none overflow-hidden border border-gray-300 p-5 md:text-base">
-            <input
-              type="text"
-              className="w-full p-3 border text-base font-medium rounded-md md:p-2"
-              placeholder="Jawaban Saya"
-              value={securityData.security_answer}
-              onChange={handleAnswerChange}
-            />
-          </div>
-
-          <div className="flex md:p-5 flex-col fixed bottom-3 left-5 right-5 justify-center mx-auto  max-w-md ">
-            <button
-              className={`p-3  text-base font-medium rounded-xl border-none w-full 
-    ${
-      securityData.security_question
-        ? `${getButtonClass()}`
-        : `${getBorderClass()}`
-    }`}
-              onClick={handleSubmit}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <FiLoader className="animate-spin  mr-2 " />
-              ) : (
-                "Daftar"
-              )}
-            </button>
-          </div>
+          </button>
         </div>
       </div>
 
       {/* Loading Modal */}
       {isLoading && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-5 rounded-md flex flex-col items-center gap-4">
-            <HiBadgeCheck
-              className={`${getIconTheme()} text-5xl border-none rounded-full`}
-            />
-            <p className="text-lg font-semibold">Mohon tunggu...</p>
-            <p className="text-sm text-gray-500">Sedang memproses registrasi</p>
-            <FiLoader
-              style={{ animation: "spin 2s linear infinite" }}
-              className={`text-4xl ${getIconTheme()}`}
-            />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 mx-4 max-w-sm w-full">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Mohon tunggu...
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Sedang memproses registrasi
+                </p>
+              </div>
+              <div className="flex justify-center">
+                <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+              </div>
+            </div>
           </div>
         </div>
       )}

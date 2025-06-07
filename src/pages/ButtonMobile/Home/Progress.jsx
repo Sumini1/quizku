@@ -399,10 +399,9 @@ const Progress = () => {
                                 {item.type}
                               </h5>
                             </div>
-                            <Link
-                              to={"/progress/hadiah-pencapaian"}
-                              className="ml-auto"
-                            >
+                           
+
+                            
                               <div
                                 className={`flex mx-3 gap-3 justify-center items-center font-bold ${getIconTheme()} ${
                                   item.id === 5 && "text-[#4B4B4B]"
@@ -417,7 +416,7 @@ const Progress = () => {
                                 </h5>
                                 <h5>{item.progress}</h5>
                               </div>
-                            </Link>
+                           
                           </div>
                         </div>
                       </Link>
